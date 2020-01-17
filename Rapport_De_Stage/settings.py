@@ -25,7 +25,7 @@ SECRET_KEY = 'vfm(j4ui46*#rq=+1n=5r4=snh&=6i1&qtr1-tje9umgv%e7*^'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
 
 
 # Application definition
@@ -37,7 +37,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'Restaurant'
+    'Restaurant',
+    'rest_framework'
 ]
 
 MIDDLEWARE = [
