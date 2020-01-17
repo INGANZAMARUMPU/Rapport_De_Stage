@@ -3,13 +3,32 @@ from django.utils import timezone
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 
+class Personnel(models.Model):
+	user = models.OneToOneField(User, on_delete=models.CASCADE)
+	role = models.ForeignKey("Role", on_delete=models.SET_NULL, null=True)
+	# role = models.ManyToManyField("Role")
+	avatar = models.ImageField(upload_to="avatars/", null=True, blank=True)
+	tel = models.CharField(verbose_name='numero de télephone', max_length=24)
+
+	class Meta:
+		unique_together = ('tel', 'role', 'user')
+
+	def __str__(self):
+		return f"{self.user.first_name} {self.user.last_name}"
+
+class Role(models.Model):
+	nom = models.CharField(max_length=20)
+	
+	def __str__(self):
+		return f"{self.nom}"
+
 class Produit(models.Model):
 	nom = models.CharField(max_length=64)
 	unite_entrant = models.CharField(max_length=64)
 	unite_sortant = models.CharField(max_length=64)
 	rapport = models.IntegerField()
 	fournisseur = models.ForeignKey("Fournisseur", null=True, on_delete=models.SET_NULL)
-	prix = models.IntegerField()
+	prix = models.IntegerField(verbose_name="prix de vente")
 
 	def __str__(self):
 		return nom
@@ -29,11 +48,21 @@ class Stock(models.Model):
 
 class Achat(models.Model):
 	produit = models.ForeignKey("Produit", on_delete=models.CASCADE)
+	offre = models.ForeignKey("Offre", on_delete=models.CASCADE)
 	quantite = models.IntegerField()
-	fournisseur = models.ForeignKey("Fournisseur", null=True, on_delete=models.SET_NULL)
 	date = models.DateField(blank=True, default=timezone.now)
-
+	personnel = models.ForeignKey("Personnel", null=True, on_delete=models.SET_NULL)
 	
+class Offre(models.Model):
+	produit = models.ForeignKey("Produit", null=True, on_delete=models.SET_NULL)
+	fournisseur = models.ForeignKey("Fournisseur", null=True, on_delete=models.SET_NULL)
+	prix = models.FloatField()
+
+	def __str__(self):
+		return f"{self.produit.nom} - {self.fournisseur}"
+
+	class Meta:
+		unique_together = ('produit', 'fournisseur', 'prix')
 
 class Fournisseur(models.Model):
 	nom = models.CharField(verbose_name='nom et prenom', max_length=64)
