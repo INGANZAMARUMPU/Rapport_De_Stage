@@ -1,7 +1,18 @@
 from django.contrib import admin
 from .models import *
 
-# Register your models here.
+class PersonnelAdmin(admin.ModelAdmin):
+	list_display = ("user", "role", "tel", "avatar")
+	list_filter = ("user", "role", "tel")
+	search_field = ("user", "role", "tel")
+	ordering = ("user", "role", "tel")
+
+class RoleAdmin(admin.ModelAdmin):
+	list_display = ("nom", )
+	list_filter = ("nom", )
+	search_field = ("nom", )
+	ordering = ("nom",)
+
 class ProduitAdmin(admin.ModelAdmin):
 	list_display = ("nom", "unite_entrant", "unite_sortant", "rapport", "fournisseur", "prix")
 	list_filter = ("nom", "unite_entrant", "unite_sortant", "rapport", "fournisseur", "prix")
@@ -14,11 +25,17 @@ class StockAdmin(admin.ModelAdmin):
 	search_field = ('produit', 'quantite')
 	ordering = ('produit', 'quantite')
 
+class OffreAdmin(admin.ModelAdmin):
+	list_display = ('produit', 'fournisseur', "prix")
+	list_filter = ('produit', 'fournisseur', "prix")
+	search_field = ('produit', 'fournisseur', "prix")
+	ordering = ('produit', 'fournisseur', "prix")
+
 class AchatsAdmin(admin.ModelAdmin):
-	list_display = ("produit", "quantite", "fournisseur", "date")
-	list_filter = ("produit", "quantite", "fournisseur", "date")
-	search_field = ("produit", "quantite", "fournisseur", "date")
-	ordering = ("produit", "quantite", "fournisseur", "date")
+	list_display = ("produit", "quantite", "offre", "personnel", "date")
+	list_filter = ("produit", "quantite", "offre", "personnel", "date")
+	search_field = ("produit", "quantite", "offre", "personnel", "date")
+	ordering = ("produit", "quantite", "offre", "personnel", "date")
 
 class FournisseurAdmin(admin.ModelAdmin):
 	list_display = ('nom', 'adresse', 'tel')
@@ -87,3 +104,6 @@ admin.site.register(Panier, PanierAdmin)
 admin.site.register(Commande, CommandeAdmin)
 admin.site.register(Paiement, PaiementAdmin)
 admin.site.register(FeedBack, FeedBackAdmin)
+admin.site.register(Role, RoleAdmin)
+admin.site.register(Personnel, PersonnelAdmin)
+admin.site.register(Offre, OffreAdmin)
