@@ -1,6 +1,7 @@
 from django.urls import path, include
 from rest_framework import routers
-from .views import *
+from .viewsets import *
+import views
 
 router = routers.DefaultRouter()
 router.register("produit", ProduitViewset)
@@ -17,5 +18,6 @@ router.register("paiement", PaiementViewset)
 router.register("feedBack", FeedBackViewset)
 
 urlpatterns = [
-    path("", include(router.urls)),
+    path("api/", include(router.urls)),
+    path("", views.home, "home"),
 ]
