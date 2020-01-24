@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+<!-- Sidebar Area End Here -->
+<!-- Breadcubs Area Start Here -->
+
+<div class="row gutters-20">
+  <div class="col-xl-4 col-sm-6 col-12">
+      <a href="{% url 'add_school' %}">
+      <div class="dashboard-summery-one mg-b-20 bg-success">
+          <div class="row align-items-center">
+              <div class="col-4">
+                  <div class="item-icon bg-light-green ">
+                      <i class="fas fa-school text-green"></i>
+                  </div>
+              </div>
+              <div class="col-8">
+                  <div class="item-content">
+                      <div class="item-title" style="color:white;">Add school</div>
+                      <div class="item-number" style="color:white;">
+                          New School
+                      </div>
+                  </div>
+              </div>
+          </div>
+      </div>
+      </a>
+  </div>
+{% for attribution in attributions %}
+    {% if attribution.school.visible %}
+      {% if attribution.role.url == 'director' and attribution.school.added_by != user %}
+
+      {% else %}
+          <div class="col-xl-4 col-sm-6 col-12">
+              <a href="{% url attribution.role.url attribution.school.slug %}">
+              <div class="dashboard-summery-one mg-b-20 bg-secondary">
+                  <div class="row align-items-center">
+                      <div class="col-4">
+                          <div class="item-icon bg-light-green ">
+                              <i class="fas fa-user-tie text-green"></i>
+                          </div>
+                      </div>
+                      <div class="col-8">
+                          <div class="item-content">
+                              <div class="item-title" style="color:white;">{{ attribution.school.name }}</div>
+                              <div class="item-number" style="color:white;">
+                                  {{ attribution.role }}
+                              </div>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+              </a>
+          </div>
+      {% endif %}
+    {% endif %}
+{% endfor %}
+</div>
+{% endblock %}
