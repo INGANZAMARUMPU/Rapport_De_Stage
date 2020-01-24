@@ -1,6 +1,6 @@
-Ceci est mon projet de rapport de fin d'étude
+Ceci est mon projet de rapport de fin d'études
 
-il fait en python
+il est fait en python
 
 Bibliothèques (actuelles)
 	- django
