@@ -1,6 +1,6 @@
 from django.urls import path, include
 from rest_framework import routers
-from .views import *
+from . import views
 from .api import *
 
 router = routers.DefaultRouter()
@@ -19,5 +19,5 @@ router.register("feedBack", FeedBackViewset)
 
 urlpatterns = [
     path("api/", include(router.urls)),
-    path("", views.home, "home"),
+    path("", views.home, name="home"),
 ]
