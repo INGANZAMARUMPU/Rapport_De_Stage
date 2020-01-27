@@ -19,5 +19,7 @@ router.register("feedBack", FeedBackViewset)
 
 urlpatterns = [
     path("api/", include(router.urls)),
-    path("", views.home, name="home"),
+    path("service/", views.service, name="service"),
+    path("manager/", views.manager, name="manager"),
+    path("commercial/", views.commercial, name="commercial"),
 ]
