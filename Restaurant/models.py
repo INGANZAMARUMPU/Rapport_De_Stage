@@ -14,7 +14,9 @@ class Personnel(models.Model):
 		unique_together = ('tel', 'role', 'user')
 
 	def __str__(self):
-		return f"{self.user.first_name} {self.user.last_name}"
+		string = self.user.first_name+self.user.last_name
+		string = string if string else self.user.username
+		return f"{string}"
 
 class Role(models.Model):
 	nom = models.CharField(max_length=20)
@@ -78,12 +80,17 @@ class Ingredient(models.Model):
 
 	class Meta:
 		unique_together = ('produit', 'quantite')
+	def __str__(self):
+		return f"{self.produit} - {self.quantite}"
 
 class Recette(models.Model):
 	nom = models.CharField(max_length=32)
 	ingredient = models.ManyToManyField("Ingredient")
 	temp = models.IntegerField(verbose_name='temp de cuisson(en minutes)')
 	prix = models.IntegerField()
+
+	def __str__(self):
+		return f"{self.nom} à {self.prix}"
 
 class Client(models.Model):
 	user = models.OneToOneField(User, on_delete=models.CASCADE)

@@ -61,13 +61,13 @@
             </div>
             <div id="layoutSidenav_content">
                 <main>      
-                <div class="container-fluid">
-                    <h1 class="mt-4">Dashboard</h1>
-                    <ol class="breadcrumb mb-4">
+                    <ol class="breadcrumb mb-4 rounded-0">
                         <li class="breadcrumb-item active">Dashboard</li>
                     </ol>
-                    {% block main %}
-                    {% endblock main %}
+                    <div class="container-fluid">
+                        {% block main %}
+
+                        {% endblock main %}
                 </main>
                 <footer class="py-4 bg-light mt-auto">
                     <div class="container-fluid">
@@ -84,8 +84,7 @@
             </div>
         </div>
         <script src="{% static "js/jquery-3.3.1.min.js" %}" crossorigin="anonymous"></script>
-        <script src="{% static "js/bootstrap.min.js" %}" crossorigin="anonymous"></script>
+        <script src="{% static "js/bootstrap.bundle.min.js" %}" crossorigin="anonymous"></script>
         <script src="{% static "js/scripts.js" %}"></script>
-        <script src="{% static "js/all.min.js" %}"></script>
     </body>
 </html>
