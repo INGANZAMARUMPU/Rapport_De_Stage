@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block cores %}
+<a class="nav-link" href="{% url 'service' %}">
+	<div class="sb-nav-link-icon"><i class="fas fa-tachometer-alt"></i></div>
+    Dashboard
+</a>
+{% endblock cores %}
+{% block interface %}
+<a class="nav-link" href="{% url 'spreparations' %}">
+    <div class="sb-nav-link-icon"><i class="fas fa-box"></i></div>
+    En Cours
+</a>
+<a class="nav-link" href="{% url 'sprepared' %}">
+    <div class="sb-nav-link-icon"><i class="fas fa-dolly"></i></div>
+    Déjà Près
+</a>
+<a class="nav-link" href="{% url 'srecettes' %}">
+    <div class="sb-nav-link-icon"><i class="fas fa-dolly"></i></div>
+    Recettes
+</a>
+{% endblock interface %}
+
+{% block addons %}
+<a class="nav-link" href="{% url 'stables' %}">
+    <div class="sb-nav-link-icon"><i class="fas fa-table"></i></div>
+    Tables
+</a>
+{% endblock addons %}

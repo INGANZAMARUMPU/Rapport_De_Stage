@@ -37,7 +37,12 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'Restaurant',
+    'apps.base',
+    'apps.commercial',
+    'apps.manager',
+    'apps.table',
+    'apps.service',
+    'apps.cuisine',
     'rest_framework'
 ]
 
