@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block cores %}
+<a class="nav-link" href="{% url 'table' %}">
+	<div class="sb-nav-link-icon"><i class="fas fa-tachometer-alt"></i></div>
+    Dashboard
+</a>
+{% endblock cores %}
+{% block interface %}
+<a class="nav-link" href="{% url 'tpanier' %}">
+    <div class="sb-nav-link-icon"><i class="fas fa-box"></i></div>
+    Panier
+</a>
+<a class="nav-link" href="{% url 'tfeeds' %}">
+    <div class="sb-nav-link-icon"><i class="fas fa-comments"></i></div>
+    Avis
+</a>
+{% endblock interface %}
+
+{% block addons %}
+{% endblock addons %}

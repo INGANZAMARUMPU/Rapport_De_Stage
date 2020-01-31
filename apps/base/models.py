@@ -75,11 +75,18 @@ class Ingredient(models.Model):
 	def __str__(self):
 		return f"{self.produit} - {self.quantite}"
 
+class Categorie(models.Model):
+	nom = models.CharField(max_length=32)
+
+	def __str__(self):
+		return f"{self.nom}"
+
 class Recette(models.Model):
 	nom = models.CharField(max_length=32)
 	ingredient = models.ManyToManyField("Ingredient")
 	temp = models.IntegerField(verbose_name='temp de cuisson(en minutes)')
 	prix = models.IntegerField()
+	categorie = models.ForeignKey("Categorie", null=True, on_delete=models.SET_NULL)
 	disponibles = models.IntegerField(verbose_name="quantité dispo")
 
 	def __str__(self):

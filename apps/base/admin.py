@@ -73,6 +73,12 @@ class PaiementAdmin(admin.ModelAdmin):
 	search_field = ("commande","somme","date")
 	ordering = ("commande","somme","date")
 
+class CategorieAdmin(admin.ModelAdmin):
+	list_display = ("nom",)
+	list_filter = ("nom",)
+	search_field = ("nom",)
+	ordering = ("nom",)
+
 class FeedBackAdmin(admin.ModelAdmin):
 	list_display = ("client", "recette", "stars", "commentaire", "visible", "date")
 	list_filter = ("client", "recette", "stars", "commentaire", "visible", "date")
@@ -88,6 +94,7 @@ admin.site.register(Ingredient, IngredientAdmin)
 admin.site.register(Recette, RecetteAdmin)
 admin.site.register(Client, ClientAdmin)
 admin.site.register(Panier, PanierAdmin)
+admin.site.register(Categorie, CategorieAdmin)
 admin.site.register(Commande, CommandeAdmin)
 admin.site.register(Paiement, PaiementAdmin)
 admin.site.register(FeedBack, FeedBackAdmin)
