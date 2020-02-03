@@ -11,11 +11,6 @@ class StockSerializer(serializers.ModelSerializer):
 		model = Stock
 		fields = "__all__"
 
-class AchatSerializer(serializers.ModelSerializer):
-	class Meta:
-		model = Achat
-		fields = "__all__"
-
 class FournisseurSerializer(serializers.ModelSerializer):
 	class Meta:
 		model = Fournisseur
@@ -29,11 +24,6 @@ class IngredientSerializer(serializers.ModelSerializer):
 class RecetteSerializer(serializers.ModelSerializer):
 	class Meta:
 		model = Recette
-		fields = "__all__"
-
-class ClientSerializer(serializers.ModelSerializer):
-	class Meta:
-		model = Client
 		fields = "__all__"
 
 class PanierSerializer(serializers.ModelSerializer):

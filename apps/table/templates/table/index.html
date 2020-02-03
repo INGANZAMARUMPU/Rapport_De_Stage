@@ -1,1 +1,78 @@
 {% extends "table/base.html" %}
+{% load static %}
+{% block main %}
+<div class="row">
+{% for recette in recettes %}
+	<div class="mt-2 col-md-4 col-xl-3 col-xs-12 col-sm-6">
+	{% if recette.aleat %}
+		<div class="card text-white bg-dark">
+			<img class="card-img-top" src="{{ recette.image.url }}" alt="Card image cap">
+			<div class="card-body">
+			  <ul class="list-group bg-dark text-white list-group-flush">
+			    <li class="list-group-item p-0 bg-dark text-white text-bold"><strong>{{ recette.nom }}</strong></li>
+			    <li class="list-group-item p-0 bg-dark text-white">{{ recette.categorie }}</li>
+			    <li class="list-group-item p-0 bg-dark text-white">{{ recette.prix }}</li>
+			  </ul>
+			</div>
+			<div class="card-footer text-muted">
+				<form class="form-inline" action="." method="post">
+					{% csrf_token %}
+					<a href="{{ recette.details }}" class="btn btn-outline-light btn-sm mr-2 openPopup">Details</a>
+					<input type="hidden" name="recette_id" value="{{ recette.id }}">
+					<input type="submit" class="btn btn-sm btn-success" value="au panier" name="submit"> 
+				</form>
+			</div>
+		</div>
+	</div>
+	{% else %}
+		<div class="card text-black bg-light">
+			<img class="card-img-top" src="{{ recette.image.url }}" alt="Card image cap">
+			<div class="card-body">
+			  <ul class="list-group bg-light text-black list-group-flush">
+			    <li class="list-group-item p-0 bg-light text-black"><strong>{{ recette.nom }}</strong></li>
+			    <li class="list-group-item p-0 bg-light text-black">{{ recette.categorie }}</li>
+			    <li class="list-group-item p-0 bg-light text-black">{{ recette.prix }}</li>
+			  </ul>
+			</div>
+			<div class="card-footer text-muted">
+				<form class="form-inline" action="." method="post">
+					{% csrf_token %}
+					<a href="{{ recette.details }}" class="btn btn-outline-dark btn-sm mr-2 openPopup">Details</a>
+					<input type="hidden" name="recette_id" value="{{ recette.id }}">
+					<input type="submit" class="btn btn-sm btn-success" value="au panier" name="submit"> 
+				</form>
+			</div>
+		</div>
+	</div>
+	{% endif %}
+{% endfor %}
+<!-- Modal -->
+<div class="modal fade" id="myModal" role="dialog">
+    <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Modal with Dynamic Content</h4>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body">
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+<script>
+$(document).ready(function(){
+    $('.openPopup').on('click',function(event){
+        event.preventDefault();
+        $('.modal-body').load($(this).attr('href'),function(){
+            $('#myModal').modal({show:true});
+        });
+    }); 
+});
+</script>
+{% endblock main %}

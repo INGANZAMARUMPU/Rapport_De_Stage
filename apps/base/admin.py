@@ -8,16 +8,10 @@ class PersonnelAdmin(admin.ModelAdmin):
 	ordering = ("user", "tel")
 
 class ProduitAdmin(admin.ModelAdmin):
-	list_display = ("nom", "unite_entrant", "unite_sortant", "rapport")
-	list_filter = ("nom", "unite_entrant", "unite_sortant", "rapport")
-	search_field = ("nom", "unite_entrant", "unite_sortant", "rapport")
-	ordering = ("nom", "unite_entrant", "unite_sortant", "rapport")
-
-class StockAdmin(admin.ModelAdmin):
-	list_display = ('produit', 'quantite')
-	list_filter = ('produit', 'quantite')
-	search_field = ('produit', 'quantite')
-	ordering = ('produit', 'quantite')
+	list_display = ("nom", "unite", "unite_sortant")
+	list_filter = ("nom", "unite", "unite_sortant")
+	search_field = ("nom", "unite", "unite_sortant")
+	ordering = ("nom", "unite", "unite_sortant")
 
 class OffreAdmin(admin.ModelAdmin):
 	list_display = ('produit', 'fournisseur', "prix")
@@ -25,11 +19,11 @@ class OffreAdmin(admin.ModelAdmin):
 	search_field = ('produit', 'fournisseur', "prix")
 	ordering = ('produit', 'fournisseur', "prix")
 
-class AchatsAdmin(admin.ModelAdmin):
-	list_display = ("produit", "quantite", "offre", "personnel", "date")
-	list_filter = ("produit", "quantite", "offre", "personnel", "date")
-	search_field = ("produit", "quantite", "offre", "personnel", "date")
-	ordering = ("produit", "quantite", "offre", "personnel", "date")
+class StockAdmin(admin.ModelAdmin):
+	list_display = ("produit", "quantite", "offre", "personnel", "date", "expiration_date")
+	list_filter = ("produit", "quantite", "offre", "personnel", "date", "expiration_date")
+	search_field = ("produit", "quantite", "offre", "personnel", "date", "expiration_date")
+	ordering = ("produit", "quantite", "offre", "personnel", "date", "expiration_date")
 
 class FournisseurAdmin(admin.ModelAdmin):
 	list_display = ('nom', 'adresse', 'tel')
@@ -43,17 +37,23 @@ class IngredientAdmin(admin.ModelAdmin):
 	search_field = ('produit', 'quantite')
 	ordering = ('produit', 'quantite')
 
-class RecetteAdmin(admin.ModelAdmin):
-	list_display = ("nom", "temp", "prix")
-	list_filter = ("nom", "temp", "prix")
-	search_field = ("nom", "temp", "prix")
-	ordering = ("nom", "temp", "prix")
+class NutrimentAdmin(admin.ModelAdmin):
+	list_display = ("recette", "energy_kcal", "protein_g", "fat_g", "calicium_mg", "copper_mg", "iodine_Mg", "iron_mg", "magnesium_mg", "selenium_Mg", "zinc_mg")
+	list_filter = ("recette", "energy_kcal", "protein_g", "fat_g", "calicium_mg", "copper_mg", "iodine_Mg", "iron_mg", "magnesium_mg", "selenium_Mg", "zinc_mg")
+	search_field = ("recette", "energy_kcal", "protein_g", "fat_g", "calicium_mg", "copper_mg", "iodine_Mg", "iron_mg", "magnesium_mg", "selenium_Mg", "zinc_mg")
+	ordering = ("recette", "energy_kcal", "protein_g", "fat_g", "calicium_mg", "copper_mg", "iodine_Mg", "iron_mg", "magnesium_mg", "selenium_Mg", "zinc_mg")
 
-class ClientAdmin(admin.ModelAdmin):
-	list_display = ("user", "points", "avatar",)
-	list_filter = ("points", "avatar", "user")
-	search_field = ("points", "avatar", "user")
-	ordering = ("points", "avatar", "user")
+class VitamineAdmin(admin.ModelAdmin):
+	list_display = ("recette", "A", "B1", "B2", "B3", "B5", "B6", "B9", "B12", "C", "D", "E", "K")
+	list_filter = ("recette", "A", "B1", "B2", "B3", "B5", "B6", "B9", "B12", "C", "D", "E", "K")
+	search_field = ("recette", "A", "B1", "B2", "B3", "B5", "B6", "B9", "B12", "C", "D", "E", "K")
+	ordering = ("recette", "A", "B1", "B2", "B3", "B5", "B6", "B9", "B12", "C", "D", "E", "K")
+
+class RecetteAdmin(admin.ModelAdmin):
+	list_display = ("nom", "temp", "image", "prix", "details")
+	list_filter = ("nom", "temp", "image", "prix", "details")
+	search_field = ("nom", "temp", "image", "prix", "details")
+	ordering = ("nom", "temp", "image", "prix", "details")
 
 class PanierAdmin(admin.ModelAdmin):
 	list_display = ("commande", "recette", "quantite", "somme", "pret")
@@ -88,15 +88,15 @@ class FeedBackAdmin(admin.ModelAdmin):
 
 admin.site.register(Produit, ProduitAdmin)
 admin.site.register(Stock, StockAdmin)
-admin.site.register(Achat, AchatsAdmin)
 admin.site.register(Fournisseur, FournisseurAdmin)
 admin.site.register(Ingredient, IngredientAdmin)
 admin.site.register(Recette, RecetteAdmin)
-admin.site.register(Client, ClientAdmin)
 admin.site.register(Panier, PanierAdmin)
 admin.site.register(Categorie, CategorieAdmin)
 admin.site.register(Commande, CommandeAdmin)
 admin.site.register(Paiement, PaiementAdmin)
 admin.site.register(FeedBack, FeedBackAdmin)
-admin.site.register(Personnel, PersonnelAdmin)
 admin.site.register(Offre, OffreAdmin)
+admin.site.register(Personnel, PersonnelAdmin)
+admin.site.register(Nutriment, NutrimentAdmin)
+admin.site.register(Vitamine, VitamineAdmin)

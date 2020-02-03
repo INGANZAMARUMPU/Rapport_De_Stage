@@ -18,12 +18,7 @@ class StockForm(forms.ModelForm):
 	class Meta:
 		model = Stock
 		fields = "__all__"
-
-class AchatForm(forms.ModelForm):
-	class Meta:
-		model = Achat
-		fields = "__all__"
-
+		
 class FournisseurForm(forms.ModelForm):
 	class Meta:
 		model = Fournisseur
@@ -59,11 +54,6 @@ class RecetteForm(forms.ModelForm):
 	)
 	class Meta:
 		model = Recette
-		fields = "__all__"
-
-class ClientForm(forms.ModelForm):
-	class Meta:
-		model = Client
 		fields = "__all__"
 
 class PanierForm(forms.ModelForm):

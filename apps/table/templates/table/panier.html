@@ -1,4 +1,60 @@
 {% extends "table/base.html" %}
 {% block main %}
+<table class="table table-hover">
+	<thead>
+		<tr>
+			<th scope="col">recette</th>
+			<th scope="col">prix</th>
+			<th scope="col">quantité</th>
+			<th scope="col">prix tot.</th>
+		</tr>
+	</thead>
+	<tbody>
+		{% for cart in carts %}
+		<tr id="test" data-id="{{ cart.id }}">
+			<td> {{ cart.recette }}</td>
+			<td class="prix"> {{ cart.recette.prix }}</td>
+			<td>
+				<input type="number" class="form-control form-control-sm quantite" value="{{ cart.quantite }}" name="quantite"> 
+			</td>
+			<td class='sommes'> {{ cart.somme }}</td>
+		</tr>
+		{% endfor %}
+	</tbody>
+	<tfoot>
+		<tr>
+			<th scope="col">total</th>
+			<th scope="col"></th>
+			<th scope="col"></th>
+			<th scope="col" id="prix_total">{{ prix_total.somme__sum }}</th>
+		</tr>
+		<tr>
+			<th scope="col"></th>
+			<th scope="col"></th>
+			<th scope="col"></th>
+			<th scope="col">
+				<button class="btn btn-primary">commander</button>
+			</th>
+		</tr>
+	</tfoot>
+</table>
+<script type="text/javascript">
+$(document).ready(function(){
+let eval_sum = () => {
+	let somme = 0;
+	for(let td of $(".sommes")){
+		somme+= parseFloat(td.innerText);
+	}
+	$("#prix_total").text(somme);
+};
+$('.quantite').on('input', function() {
+	let td_prix = $(this).parent().siblings('.prix');
+	let td_somme = $(this).parent().siblings('.sommes');
+	let quantite = parseFloat($(this).val());
 
+	td_somme.text(parseFloat(td_prix.text())*quantite);
+	eval_sum();
+});
+});
+</script>
 {% endblock main %}
