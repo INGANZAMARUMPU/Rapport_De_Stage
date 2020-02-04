@@ -56,16 +56,16 @@ class RecetteAdmin(admin.ModelAdmin):
 	ordering = ("nom", "temp", "image", "prix", "details")
 
 class PanierAdmin(admin.ModelAdmin):
-	list_display = ("commande", "recette", "quantite", "somme", "pret")
-	list_filter = ("commande", "recette", "quantite", "somme", "pret")
-	search_field = ("commande", "recette", "quantite", "somme", "pret")
-	ordering = ("commande", "recette", "quantite", "somme", "pret")
+	list_display = ("recette", "commande", "quantite", "somme", "pret")
+	list_filter = ("recette", "commande", "quantite", "somme", "pret")
+	search_field = ("recette", "commande", "quantite", "somme", "pret")
+	ordering = ("recette", "commande", "quantite", "somme", "pret")
 
 class CommandeAdmin(admin.ModelAdmin):
-	list_display = ("client", "tel", "date", "servi", "commandee", "pret")
-	list_filter = ("client", "tel", "date", "servi", "commandee", "pret")
-	search_field = ("client", "tel", "date", "servi", "commandee", "pret")
-	ordering = ("client", "tel", "date", "servi", "commandee", "pret")
+	list_display = ("client", "tel", "date", "a_payer", "payee", "reste", "servi", "commandee", "pret")
+	list_filter = ("client", "tel", "date", "a_payer", "payee", "reste", "servi", "commandee", "pret")
+	search_field = ("client", "tel", "date", "a_payer", "payee", "reste", "servi", "commandee", "pret")
+	ordering = ("client", "tel", "date", "a_payer", "payee", "reste", "servi", "commandee", "pret")
 
 class PaiementAdmin(admin.ModelAdmin):
 	list_display = ("commande","somme","date")

@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models import Sum
 from django.utils import timezone
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save
@@ -125,13 +126,18 @@ class Recette(models.Model):
 class Panier(models.Model):
 	commande = models.ForeignKey("Commande", null=True, on_delete=models.CASCADE)
 	recette = models.ForeignKey("Recette", null=True, on_delete=models.SET_NULL)
-	quantite = models.IntegerField()
-	somme = models.IntegerField(verbose_name='à payer')
+	quantite = models.IntegerField(default=1)
+	somme = models.IntegerField(blank=True, verbose_name='à payer')
 	pret = models.BooleanField(default=False)
 
 	def save(self, *args, **kwargs):
 		self.somme = self.recette.prix*self.quantite
+		commande = self.commande
 		super(Panier, self).save(*args, **kwargs)
+		somme_comandes = Panier.objects.filter(commande=commande).aggregate(Sum('somme'))['somme__sum']
+		commande.a_payer = somme_comandes
+		commande.save()
+
 
 	def __str__(self):
 		return f"{self.recette}"
@@ -143,11 +149,25 @@ class Commande(models.Model):
 	servi = models.BooleanField(default=False)
 	commandee = models.BooleanField(default=False)
 	pret = models.BooleanField(default=False)
+	a_payer = models.FloatField(default=0, blank=True)
+	payee = models.FloatField(default=0, blank=True)
+	reste = models.FloatField(default=0, blank=True)
+
+	def save(self, *args, **kwargs):
+		super(Commande, self).save(*args, **kwargs)
 
 class Paiement(models.Model):
 	commande = models.ForeignKey("Commande", null=True, on_delete=models.SET_NULL)
-	somme = models.IntegerField(verbose_name='somme payée')
+	somme = models.IntegerField(verbose_name='somme payée', default=0)
 	date = models.DateField(blank=True, default=timezone.now)
+
+	def save(self, *args, **kwargs):
+		commande = self.commande
+		super(Paiement, self).save(*args, **kwargs)
+		paiements = Paiement.objects.filter(commande=commande).aggregate(Sum("somme"))["somme__sum"]
+		commande.payee = paiements
+		commande.reste = commande.a_payer-paiements
+		commande.save()
 
 class FeedBack(models.Model):
 	client = models.ForeignKey(User, null=True, on_delete=models.SET_NULL)
@@ -159,13 +179,3 @@ class FeedBack(models.Model):
 
 	class Meta:
 		unique_together = ('client', 'recette')
-
-def onPaiementSaved(sender, instance, *args, **kwargs):
-	a_payer = instance.commande.somme
-	payee = instance.commande.payee+instance.somme
-	instance.commande.payee += payee
-	instance.commande.reste = a_payer - payee
-	if a_payer >= payee:
-		instance.fini=True
-
-post_save.connect(onPaiementSaved, sender=Paiement)

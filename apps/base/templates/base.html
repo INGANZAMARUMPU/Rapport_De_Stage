@@ -12,6 +12,7 @@
     <link href="{% static "css/all.min.css" %}" rel="stylesheet" />
     <link href="{% static "css/bootstrap.min.css" %}" rel="stylesheet" crossorigin="anonymous" />
     <script src="{% static "js/jquery-3.3.1.min.js" %}" crossorigin="anonymous"></script>
+    <script src="{% static "js/jquery.cookie.min.js" %}" crossorigin="anonymous"></script>
         
 </head>
 <body class="sb-nav-fixed">
@@ -70,7 +71,7 @@
                     {% if messages %}
                         {% for message in messages %}
                             {% if message.level == DEFAULT_MESSAGE_LEVELS.SUCCESS %}
-                            <div class="alert alert-success alert-dismissible fade show text-center position-absolute" id="success-alert" role="alert">
+                            <div class="alert alert-success alert-dismissible fade show text-center position-absolute" style="z-index:1" id="success-alert" role="alert">
                                 {{ message }}
                                 <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                                     <span aria-hidden="true">&times;</span>
@@ -78,7 +79,7 @@
                             </div>
                             {% endif %}
                             {% if message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}
-                            <div class="alert alert-danger alert-dismissible fade show text-center position-absolute" id="danger-alert" role="alert">
+                            <div class="alert alert-danger alert-dismissible fade show text-center position-absolute" id="danger-alert" style="z-index:1" role="alert">
                                 {{ message }}
                                 <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                                     <span aria-hidden="true">&times;</span>

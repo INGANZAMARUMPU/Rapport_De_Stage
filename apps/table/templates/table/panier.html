@@ -1,45 +1,49 @@
 {% extends "table/base.html" %}
 {% block main %}
-<table class="table table-hover">
-	<thead>
-		<tr>
-			<th scope="col">recette</th>
-			<th scope="col">prix</th>
-			<th scope="col">quantité</th>
-			<th scope="col">prix tot.</th>
-		</tr>
-	</thead>
-	<tbody>
-		{% for cart in carts %}
-		<tr id="test" data-id="{{ cart.id }}">
-			<td> {{ cart.recette }}</td>
-			<td class="prix"> {{ cart.recette.prix }}</td>
-			<td>
-				<input type="number" class="form-control form-control-sm quantite" value="{{ cart.quantite }}" name="quantite"> 
-			</td>
-			<td class='sommes'> {{ cart.somme }}</td>
-		</tr>
-		{% endfor %}
-	</tbody>
-	<tfoot>
-		<tr>
-			<th scope="col">total</th>
-			<th scope="col"></th>
-			<th scope="col"></th>
-			<th scope="col" id="prix_total">{{ prix_total.somme__sum }}</th>
-		</tr>
-		<tr>
-			<th scope="col"></th>
-			<th scope="col"></th>
-			<th scope="col"></th>
-			<th scope="col">
-				<button class="btn btn-primary">commander</button>
-			</th>
-		</tr>
-	</tfoot>
-</table>
+{% if carts %}
+	<table class="table table-hover" data-id="{{ commande.id }}" id="commande">
+		<thead>
+			<tr>
+				<th scope="col">recette</th>
+				<th scope="col">prix</th>
+				<th scope="col">quantité</th>
+				<th scope="col">prix tot.</th>
+			</tr>
+		</thead>
+		<tbody>
+			{% for cart in carts %}
+			<tr class="cart-item" data-id="{{ cart.id }}">
+				<td> {{ cart.recette }}</td>
+				<td class="prix"> {{ cart.recette.prix }}</td>
+				<td>
+					<input type="number" class="form-control form-control-sm quantite" value="{{ cart.quantite }}"> 
+				</td>
+				<td class='sommes'> {{ cart.somme }}</td>
+			</tr>
+			{% endfor %}
+		</tbody>
+		<tfoot>
+			<tr>
+				<th scope="col">total</th>
+				<th scope="col"></th>
+				<th scope="col">
+				</th>
+				<th scope="col" id="prix_total">{{ prix_total.somme__sum }}</th>
+			</tr>
+			<tr>
+				<th scope="col"></th>
+				<th scope="col"></th>
+				<th scope="col"></th>
+				<th scope="col">
+					<button class="btn btn-primary" id="commander">commander</button>
+				</th>
+			</tr>
+		</tfoot>
+	</table>
+{% endif %}
 <script type="text/javascript">
 $(document).ready(function(){
+let csrf = $("#csrftoken").attr("data-id");
 let eval_sum = () => {
 	let somme = 0;
 	for(let td of $(".sommes")){
@@ -51,10 +55,61 @@ $('.quantite').on('input', function() {
 	let td_prix = $(this).parent().siblings('.prix');
 	let td_somme = $(this).parent().siblings('.sommes');
 	let quantite = parseFloat($(this).val());
-
+	if(isNaN(quantite) || quantite < 0){
+		quantite = 0;
+		$(this).val(0);
+	}
 	td_somme.text(parseFloat(td_prix.text())*quantite);
+	$(this).val(parseFloat(quantite));
 	eval_sum();
 });
+
+$("#commander").on('click', function(){
+	let datas = [];
+	let no_error = true;
+	let id_commande = $("#commande").attr('data-id');
+	for(let tr of $('.cart-item')){
+		let $tr = $(tr);
+		let id = $tr.attr("data-id");
+		let quantite = $tr.find(".quantite").first().val();
+		data = {id:id, quantite:quantite};
+		// datas.push(data);
+		$.ajax({
+			type:'PUT',
+			headers: { "X-CSRFToken": $.cookie("csrftoken") },
+			url:'/api/panier/'+id+'/',
+			data:data,
+			success:function(updated){
+				console.log(updated);
+			},
+			error:function(){
+				no_error=false;
+			}
+		});
+	}
+	if(no_error){
+		let tel = parseInt(prompt("si vou voulez beneficier d'autres valeurs ajoutées", ""));
+		if(isNaN(tel) || tel < 0){
+			tel = 0;
+		}
+		data = {id:id_commande, commandee:true, tel:tel};
+		$.ajax({
+			type:'PUT',
+			headers: { "X-CSRFToken": $.cookie("csrftoken") },
+			url:'/api/commande/'+id_commande+'/',
+			data:data,
+			success:function(){
+				alert("Good");
+				$("#commande").remove();
+				$("#n_carts").text(0);
+			},
+			error:function(){
+				alert("Oh No something goes wrong!!");
+			}
+		});
+	}
+});
+
 });
 </script>
 {% endblock main %}
