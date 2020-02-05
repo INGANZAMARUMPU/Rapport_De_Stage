@@ -1,1 +1,63 @@
 {% extends "service/base.html" %}
+{% load mathfilters %}
+{% block main %}
+<div class="bg-light mb-2" id="workspace" style="position:relative;width:1000px; height:500px">
+	{% for table in tables %}
+	<div class="card client-table"
+		style='	width: 120px; 
+				left:{{ table.x }}px;
+				top:{{ table.y }}px;
+				position:absolute;
+				-moz-user-select: -moz-none;
+				-khtml-user-select: none;
+				-webkit-user-select: none;
+				cursor: grab;'>
+		<div class="card-body m-auto">
+			{{ table }}
+		</div>
+	</div>
+	{% endfor %}
+</div>
+<script type="text/javascript">
+jQuery(document).ready(function($) {
+	let $dragging = null;
+	let draggable = null;
+	let local_x = null;
+	let local_y = null;
+	let global_x = null;
+	let global_y = null;
+	$(".client-table").on("mousedown", function (event) {
+		$dragging = true;
+		$(".client-table").css("z-index", 0);
+		$draggable = $(this);
+	    let offset = $(this).offset();
+	    local_x = event.pageX-offset.left;
+	    local_y = event.pageY-offset.top;
+	    $(this).css("z-index", 1);
+
+	});
+
+	$(".client-table").parent().on("mouseup click", function (e) {
+	    $dragging = null;
+		console.log($draggable.position());
+
+	});
+
+	$(".client-table").parent().on("mousemove", function (event) {
+	    if ($dragging) {
+	    	let offset = $(this).offset();
+	    	let max_w = $(this).width()-$draggable.width();
+	    	let max_h = $(this).height()-$draggable.height();
+	    	global_x = event.pageX-offset.left-local_x;
+			global_y = event.pageY-offset.top-local_y;
+			// console.log(global_x, max_w, global_y, max_h);
+			if(global_x<max_w && global_x>=0 && global_y<max_h && global_y>=0){
+				$draggable.css("left", global_x+"px");
+				$draggable.css("top", global_y+"px");
+			}
+	    }
+	});
+});
+
+</script>
+{% endblock main %}				

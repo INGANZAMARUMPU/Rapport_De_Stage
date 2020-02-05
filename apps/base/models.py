@@ -19,6 +19,19 @@ class Personnel(models.Model):
 		string = string if string else self.user.username
 		return f"{string}"
 
+class Image(models.Model):
+	schema1 = models.ImageField(upload_to="logo/")
+	schema2 = models.ImageField(upload_to="logo/")
+
+class Table(models.Model):
+	user = models.OneToOneField(User, on_delete=models.CASCADE, unique=True)
+	image = models.ForeignKey('Image', null=True, blank=True, on_delete=models.SET_NULL)
+	x = models.IntegerField(default=0)
+	y = models.IntegerField(default=0)
+
+	def __str__(self):
+		return f"{self.user.username}"
+
 class Produit(models.Model):
 	nom = models.CharField(max_length=64, unique=True)
 	unite = models.CharField(max_length=64, verbose_name='unité de mesure')

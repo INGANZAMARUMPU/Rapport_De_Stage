@@ -1,9 +1,10 @@
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
-from .models import *
+from apps.base.models import *
 
 @login_required
 def service(request):
+	tables = Table.objects.all()
 	return render(request, 'service/index.html', locals())
 
 @login_required
