@@ -43,7 +43,8 @@ INSTALLED_APPS = [
     'apps.table',
     'apps.service',
     'apps.cuisine',
-    'rest_framework'
+    'rest_framework',
+    'mathfilters'
 ]
 
 MIDDLEWARE = [

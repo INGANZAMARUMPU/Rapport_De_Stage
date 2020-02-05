@@ -1,4 +1,76 @@
 {% extends "table/base.html" %}
 {% block main %}
+<div class="row">
+{% for panier in paniers %}		
+<div class="col-md-6">
+	<div class="well well-sm">
+        <div class="row" id="post-review-box">
+            <div class="col-md-12">
+			    <div class="row lead ml-1">
+			        <div class="stars" data-id={{ panier.id }}>
+						<span class="fa fa-star" data-id="1"></span>
+						<span class="fa fa-star" data-id="2"></span>
+						<span class="fa fa-star" data-id="3"></span>
+						<span class="fa fa-star" data-id="4"></span>
+						<span class="fa fa-star" data-id="5"></span>
+			        </div>
+			        <span class="star_count">0</span> star(s)
+			    </div>
+                <form accept-charset="UTF-8" action="" method="post">
+                    <textarea class="form-control animated" cols="50" name="comment" placeholder="Enter your review here..." rows="3">
+                    </textarea>
+                    <button class="btn btn-success btn-sm mt-1 float-right" type="submit">soumettre</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}     
+</div>
+<script type="text/javascript">
+$(".stars").on("mouseenter", (event) => {
+	let $groupe = $(event.target);
+	$groupe.children(".fa-star").on("click", (event) => {
+		let active = $(event.target).attr("data-id");
+		$groupe.children(".fa-star").removeClass("hovered");
+		$groupe.children(".fa-star").removeClass("checked");
+		$groupe.children(".fa-star").removeClass("selected");
+		for(let span of $groupe.children(".fa-star")){
+			let x = $(span).attr("data-id");
+			if(x != active){
+				$(span).addClass('checked');
+			} else{
+				$(span).addClass('selected');
+				console.log($groupe.find(".star_count"));
+				$groupe.parent().find(".star_count").text(active+"/5")
+				rate($groupe.attr('data-id'), active);
+				break;
+			}
+		}
+	});
 
+	$groupe.children(".fa-star").on("mouseover", (event) => {
+		let active = $(event.target).attr("data-id");
+		$groupe.children(".fa-star").removeClass("hovered");
+		for(let span of $groupe.children(".fa-star")){
+			let x = $(span).attr("data-id");
+			if(x != active){
+				$(span).addClass('hovered');
+			} else{
+				$(span).addClass('hovered');
+				break;
+			}
+		}
+	});
+});
+$(".stars").on("mouseleave", (event) => {
+	let $groupe = $(event.target);
+	$groupe.children(".fa-star").removeClass("hovered");
+});
+
+let rate = (id_item, rate_value) =>{
+	console.log('item '+id_item+' got '+rate_value);
+}
+
+</script>
 {% endblock main %}

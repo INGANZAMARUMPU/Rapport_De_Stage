@@ -14,14 +14,11 @@ def table(request, id_categorie=None): # id_categorie
 		recettes = Recette.objects.all()
 	if request.POST.get('recette_id'):
 		to_cart = Recette.objects.get(id = int(request.POST.get('recette_id')))
-		get_or_create = Panier.objects.get_or_create(commande=commande, recette=to_cart)
-		panier = get_or_create[0]
-		if not get_or_create[1]:
-			panier.quantite+=1
-			panier.save()
-		messages.success(request,\
-			str(panier.quantite)+" "+str(panier.recette)+" au panier")
-	n_carts = Panier.objects.filter(commande=commande).count()
+		panier = Panier(commande=commande, recette=to_cart, quantite=1)
+		panier.save()
+		messages.success(request, str(panier.recette)+" au panier")
+	cart_rec_ids = Panier.objects.filter(commande=commande).values_list('recette', flat=True)
+	n_carts = cart_rec_ids.count()
 	return render(request, 'table/index.html', locals())
 
 @allowed_users(groups=['table'])
@@ -34,7 +31,6 @@ def feedback(request):
 	commandes = Commande.objects.filter(client=request.user,\
 	commandee=True, servi=True, pret=True)
 	paniers = Panier.objects.filter(commande__in=commandes)
-	print(paniers)
 	return render(request, 'table/feeds.html', locals())
 
 @allowed_users(groups=['table'])

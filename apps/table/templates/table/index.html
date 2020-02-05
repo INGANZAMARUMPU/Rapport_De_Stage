@@ -1,5 +1,6 @@
 {% extends "table/base.html" %}
 {% load static %}
+{% load mathfilters %}
 {% block main %}
 <div class="row">
 {% for recette in recettes %}
@@ -19,7 +20,7 @@
 					{% csrf_token %}
 					<a href="{{ recette.details }}" class="btn btn-outline-light btn-sm mr-2 openPopup">Details</a>
 					<input type="hidden" name="recette_id" value="{{ recette.id }}">
-					<input type="submit" class="btn btn-sm btn-success" value="au panier" name="submit"> 
+					<input type="submit" class="btn btn-sm btn-success" value={% if recette.id not in cart_rec_ids %}"au panier" {% else %} "rajouter" {% endif %} name="submit"> 
 				</form>
 			</div>
 		</div>
@@ -39,7 +40,7 @@
 					{% csrf_token %}
 					<a href="{{ recette.details }}" class="btn btn-outline-dark btn-sm mr-2 openPopup">Details</a>
 					<input type="hidden" name="recette_id" value="{{ recette.id }}">
-					<input type="submit" class="btn btn-sm btn-success" value="au panier" name="submit"> 
+					<input type="submit" class="btn btn-sm btn-success" value={% if recette.id not in cart_rec_ids %}"au panier" {% else %} "rajouter" {% endif %} name="submit"> 
 				</form>
 			</div>
 		</div>

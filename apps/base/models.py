@@ -2,7 +2,7 @@ from django.db import models
 from django.db.models import Sum
 from django.utils import timezone
 from django.contrib.auth.models import User
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, pre_save
 from datetime import datetime, timedelta
 from random import randint
 
@@ -131,12 +131,13 @@ class Panier(models.Model):
 	pret = models.BooleanField(default=False)
 
 	def save(self, *args, **kwargs):
+		old = Panier.objects.filter(commande=self.commande, recette=self.recette)
+		if old and self.quantite:
+			last = old.last()
+			last.quantite+=self.quantite
+			self = last
 		self.somme = self.recette.prix*self.quantite
-		commande = self.commande
 		super(Panier, self).save(*args, **kwargs)
-		somme_comandes = Panier.objects.filter(commande=commande).aggregate(Sum('somme'))['somme__sum']
-		commande.a_payer = somme_comandes
-		commande.save()
 
 
 	def __str__(self):
@@ -179,3 +180,23 @@ class FeedBack(models.Model):
 
 	class Meta:
 		unique_together = ('client', 'recette')
+
+def delZeroQuantity(sender, instance, *args, **kwargs):
+	self = instance
+	if not self.quantite:
+		commande = self.commande
+		self.delete()
+		paniers = Panier.objects.filter(commande=commande)
+		if not paniers:
+			commande.delete()
+	else:
+		somme_comandes = Panier.objects.filter(commande=self.commande).aggregate(Sum('somme'))['somme__sum']
+		self.commande.a_payer = somme_comandes
+		self.commande.save()
+
+# def addIfExist(sender, instance, *args, **kwargs):
+# 	self = instance
+
+
+post_save.connect(delZeroQuantity, sender=Panier)
+# pre_save.connect(addIfExist, sender=Panier)
