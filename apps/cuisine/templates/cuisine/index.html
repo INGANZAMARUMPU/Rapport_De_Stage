@@ -1,1 +1,88 @@
 {% extends "cuisine/base.html" %}
+{% block main %}
+<div class="container">
+	<div class="row parent">
+	{% for commande in commandes %}
+	<div class="commande" data-id="{{ commande.id }}" style="display:none"></div>
+	{% endfor %}
+	</div>
+</div>
+<script type="text/javascript">
+
+jQuery(document).ready(function($) {
+let renderTemplate = (parent, image, nom, panier_id, commande, recette) =>{
+	let template =`
+<div class="mt-2 col-md-4 col-xl-3 col-xs-12 col-sm-6 template-parent">
+	<div class="card bg-light">
+		<img class="card-img-top" src="`+image+`" alt="Card image cap">
+		<div class="card-body">
+		  <ul class="list-group bg-light list-group-flush">
+		    <li class="list-group-item p-0 bg-light text-bold">
+		    	<strong>`+nom+`</strong>
+		    </li>
+		  </ul>
+		</div>
+		<div class="card-footer text-muted">
+			<button class="btn btn-sm btn-success
+			col-12 btn-valider-pret" data-id='`+panier_id+`'>
+				pret
+			</button>
+		</div>
+	</div>
+</div>`;
+	parent.append(template);
+}
+const $all_commandes = $(".commande");
+
+for (var i=0; i < $all_commandes.length; i++){
+	let $div = $($all_commandes[i]);
+	let $parent = $div.parent('.parent');
+	comm_id = $div.attr('data-id');
+	$.ajax({
+		url: '/api/deep_panier/commande/'+comm_id+'/',
+		type: 'GET',
+		dataType: 'json',
+	})
+	.done(function(data) {
+		for(let panier of data ){
+			renderTemplate($parent,
+				panier.recette.image,panier.recette.nom,
+				panier.id, panier.commande, panier.recette);
+		}
+	})
+	.fail(function() {
+		console.log("error");
+	})
+	.always(function() {
+	});
+}
+// $("main").delegate('.btn-valider-pret', 'click', function(event) {
+$("main").on('click', '.btn-valider-pret', function(event) {
+	let $btn = $(this);
+	console.log($btn);
+	let panier_id = $btn.attr('data-id');
+	data = {pret: true,};
+	$.ajax({
+		url: '/api/deep_panier/'+panier_id+'/',
+		type: 'PUT',
+		headers : { "X-CSRFToken": $.cookie("csrftoken") },
+		dataType: 'json',
+		data: data,
+	})
+	.done(function() {
+		console.log("template-parent");
+		let $parent = $btn.closest(".template-parent");
+		$parent.fadeOut('slow', function() {
+			$(this).remove();
+		});
+	})
+	.fail(function() {
+		console.log("error");
+	})
+	.always(function() {
+	});
+
+});
+});
+</script>
+{% endblock main %}

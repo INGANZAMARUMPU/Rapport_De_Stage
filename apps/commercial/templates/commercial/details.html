@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block body %}
+<div style="background-color:cadetblue">
+    <main>
+        <div class="container p-2">
+            <div class="row justify-content-center">
+                <div class="col-12">
+                	<table class="table table-inverse table-light table-striped table-sm">
+                		<thead>
+                			<tr>
+                				<th>produit</th>
+                				<th>quantite</th>
+                				<th>expiration</th>
+                			</tr>
+                		</thead>
+                		<tbody>
+                			{% for stock in stocks %}
+                			<tr>
+                				<td>{{ stock.produit }}</td>
+                				<td>{{ stock.quantite }}</td>
+                				<td>{{ stock.expiration_date }}</td>
+                			</tr>                				
+                			{% endfor %}
+                		</tbody>
+                	</table>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+{% endblock body %}

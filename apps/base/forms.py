@@ -15,9 +15,21 @@ class ProduitForm(forms.ModelForm):
 		fields = "__all__"
 
 class StockForm(forms.ModelForm):
+	offre = forms.ModelChoiceField(
+		widget = forms.Select(
+			attrs={'placeholder':'offre','class':'form-control'}),
+		queryset = Offre.objects.all())
+	quantite = forms.IntegerField(
+		widget=forms.NumberInput(
+			attrs={'placeholder':'quantite','class':'form-control'}))
+	expiration = forms.IntegerField(widget=forms.NumberInput(attrs={'placeholder':'délais de validité(en jours)','class':'form-control'}))
 	class Meta:
 		model = Stock
-		fields = "__all__"
+		fields = ("offre", "quantite", "expiration")
+
+	def __init__(self, produit_id, *args, **kwargs):
+		super(StockForm, self).__init__(*args, **kwargs)
+		self.base_fields["offre"].queryset = Offre.objects.filter(produit=produit_id)
 		
 class FournisseurForm(forms.ModelForm):
 	class Meta:

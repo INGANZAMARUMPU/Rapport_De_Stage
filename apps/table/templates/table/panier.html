@@ -51,7 +51,8 @@ let eval_sum = () => {
 	}
 	$("#prix_total").text(somme);
 };
-$('.quantite').on('input', function() {
+$('.quantite').on('input', function(event) {
+	event.stopPropagation();
 	let td_prix = $(this).parent().siblings('.prix');
 	let td_somme = $(this).parent().siblings('.sommes');
 	let quantite = parseFloat($(this).val());
@@ -92,7 +93,7 @@ $("#commander").on('click', function(){
 		if(isNaN(tel) || tel < 0){
 			tel = 0;
 		}
-		data = {id:id_commande, commandee:true, tel:tel};
+		data = {commandee:true, tel:tel};
 		$.ajax({
 			type:'PUT',
 			headers: { "X-CSRFToken": $.cookie("csrftoken") },
@@ -104,7 +105,7 @@ $("#commander").on('click', function(){
 				$("#n_carts").text(0);
 			},
 			error:function(){
-				location.reload()
+				// location.reload()
 			}
 		});
 	}

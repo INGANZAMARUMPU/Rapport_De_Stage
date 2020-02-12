@@ -3,21 +3,14 @@ from django.contrib.auth.decorators import login_required
 from apps.base.models import *
 
 @login_required
-def service(request):
-	tables = Table.objects.all()
+def service(request, place_id=None, ordered=None):
+	if place_id:
+		places = Place.objects.filter(id=place_id)
+	else:
+		places = Place.objects.all()
+	if places:
+		tables = Table.objects.filter(place=places.first())
 	return render(request, 'service/index.html', locals())
-
-@login_required
-def preparations(request):
-	return render(request, 'service/preparations.html', locals())
-
-@login_required	
-def prepared(request):
-	return render(request, 'service/prepared.html', locals())
-
-@login_required
-def recettes(request):
-	return render(request, 'service/recettes.html', locals())
 
 @login_required
 def tables(request):

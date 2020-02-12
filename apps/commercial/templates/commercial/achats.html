@@ -1,7 +1,29 @@
-{% extends "commercial/base.html" %}
-{% block main %}
-<div>
-	pour ajouter modifier ou supprimer les achats du stock clickez 
-	<a href="/admin/Restaurant/achat" target="_blank">ici</a>
+{% extends "base.html" %}
+{% block body %}
+<div style="background-color:cadetblue">
+	<main>
+	    <div class="container p-2">
+	        <div class="row justify-content-center">
+	            {% if messages %}
+	            {% for message in messages %}
+	                {% if message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}
+	                    <div class="alert alert-danger alert-dismissible fade show text-center fixed-top" id="danger-alert" role="alert">
+	                        {{ message }}
+	                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+	                            <span aria-hidden="true">&times;</span>
+	                        </button>
+	                    </div>
+	                {% endif %}
+	            {% endfor %}
+	            {% endif %}
+	            <div class="col-12">
+                    <form method="POST" action="{% url 'cachats' product_id %}" >
+                    	{% csrf_token %}
+                        {{ form.as_p }}
+                    </form>
+	            </div>
+	        </div>
+	    </div>
+	</main>
 </div>
-{% endblock main %}
+{% endblock body %}

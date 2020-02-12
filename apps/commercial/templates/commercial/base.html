@@ -1,27 +1,18 @@
 {% extends "base.html" %}
 
 {% block cores %}
-<a class="nav-link" href="{% url 'commercial' %}">
-	<div class="sb-nav-link-icon"><i class="fas fa-tachometer-alt"></i></div>
-    Dashboard
-</a>
+{% for place in places %}
+    <a class="nav-link pb-0 place" data-id="{{ place.id }}" href="{% url 'commercial' place.id %}">
+        <div class="sb-nav-link-icon"><i class="fas fa-box"></i></div>
+        {{ place }}
+        {# <span class="badge badge-primary ml-2">0</span> #}
+    </a>
+{% endfor %}
 {% endblock cores %}
 {% block interface %}
-<a class="nav-link" href="{% url 'ccommandes' %}">
-    <div class="sb-nav-link-icon"><i class="fas fa-users"></i></div>
-    Commandes
-</a>
 <a class="nav-link" href="{% url 'cstock' %}">
     <div class="sb-nav-link-icon"><i class="fas fa-box"></i></div>
     Stock
-</a>
-<a class="nav-link" href="{% url 'cachats' %}">
-    <div class="sb-nav-link-icon"><i class="fas fa-dolly"></i></div>
-    Achats
-</a>
-<a class="nav-link" href="{% url 'coffres' %}">
-    <div class="sb-nav-link-icon"><i class="fas fa-comments"></i></div>
-    Offres
 </a>
 {% endblock interface %}
 
@@ -31,3 +22,8 @@
     Tables
 </a>
 {% endblock addons %}
+{% block scripts %}
+jQuery(document).ready(function($) {
+
+});
+{% endblock scripts %}

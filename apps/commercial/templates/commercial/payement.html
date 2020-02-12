@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block body %}
+    <div style="background-color:cadetblue">
+        <div id="layoutAuthentication_content">
+            <main>
+                <div class="container p-2">
+                    <div class="row justify-content-center">
+                        {% if messages %}
+                        {% for message in messages %}
+                            {% if message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}
+                                <div class="alert alert-danger alert-dismissible fade show text-center fixed-top" id="danger-alert" role="alert">
+                                    {{ message }}
+                                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                        {% endif %}
+                        <div class="col-12">
+                            <form method="POST" action='.' id="form_payer" data-id={{ table_id }} >
+                                <div>
+                                    <label>à payer</label>
+                                    <label id="lbl_a_payer" class="font-weight-bold">
+                                        {{ a_payer }}
+                                    </label>
+                                </div>
+                                {% csrf_token %}
+                                <div class="form-group">
+                                    <input class="form-control py-4" type="number" id="champ_somme" placeholder="saisissez la somme" />
+                                </div>
+                                <div>
+                                    <label>à rendre</label>
+                                    <label id="a_rendre" class="font-weight-bold">0</label>
+                                </div>
+                                <div class="mt-4 mb-0">
+                                    <input type="submit" class="btn btn-primary float-right">
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+<script type="text/javascript">
+jQuery(document).ready(function($) {
+$('#champ_somme').on('input', function() {
+    let $a_payer = $("#lbl_a_payer").text();
+    let $lbl_rendre = $('#a_rendre');
+    let $payee = parseFloat($(this).val());
+    $(this).val((isNaN($payee) || $payee < 0)? 0 : $payee)
+    $lbl_rendre.text($a_payer-$payee);
+});
+$("#form_payer").on('submit', function(event){
+    event.preventDefault();
+    let table_id = $(this).attr('data-id');
+    let a_payer = $('#champ_somme').val();
+    $.ajax({
+        url: '/api/panier/payer/'+table_id+"/"+a_payer+"/",
+        type: 'PUT',
+        headers : {"X-CSRFToken":$.cookie("csrftoken")},
+        dataType: 'json',
+    })
+    .done(function(data) {
+        $('#lbl_a_payer').text(data.reste);
+    })
+    .fail(function() {
+        console.log("error");
+    })
+    .always(function() {
+        console.log("complete");
+    });    
+});
+
+});
+</script>
+{% endblock body %}

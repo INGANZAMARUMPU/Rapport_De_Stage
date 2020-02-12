@@ -1,7 +1,103 @@
 {% extends "commercial/base.html" %}
 {% block main %}
-<div>
-	pour ajouter modifier ou supprimer les données du stock clickez 
-	<a href="/admin/Restaurant/stock" target="_blank">ici</a>
+<div class="row">
+    <div class="col-xl-4 col-sm-6 col-12 p-1">
+        <a href="/admin/base/offre" target="blank" class="text-decoration-none">
+        <div class="rounded bg-success">
+            <div class="text-center text-light ">Gerer</div>
+            <div class="text-center text-light font-weight-bold">les Offre</div>
+        </div>
+        </a>
+    </div>
+    <div class="col-xl-4 col-sm-6 col-12 p-1">
+        <a href="/admin/base/produit" target="blank" class="text-decoration-none">
+        <div class="rounded bg-success">     
+            <div class="text-center text-light">gerer</div>
+            <div class="text-center text-light font-weight-bold">les produits</div>
+        </div>
+        </a>
+    </div>
+    <div class="col-xl-4 col-sm-6 col-12 p-1">
+        <a href="/admin/base/fournisseurs" target="blank" class="text-decoration-none">
+        <div class="rounded bg-success">     
+            <div class="text-center text-light">gerer</div>
+            <div class="text-center text-light font-weight-bold">les fournisseurs</div>
+        </div>
+        </a>
+    </div>
+    <div class="row m-1 p-0">
+    {% for product in products %}
+	    <div class="col-xl-4 col-sm-6 col-12 p-1 product">
+	        <a href="/admin/base/stock/?produit__id__exact={{ product.id }}"
+	        	class="text-decoration-none" target="blank">
+	        <div class="rounded bg-light m-0">  
+	            <div class="text-center font-weight-bold">{{ product.nom }} {{ class.section }} </div>
+	            <div class="text-center"> 
+	                {{ product.quantiteEnStock|default:0 }} {{ product.unite }}
+	            </div>
+	            <div class="row col-12 p-1 m-0 d-none options">
+		            <div class="col-6 p-1">
+		            	<a class="btn col-12 text-light btn-secondary btn-sm modal-link"
+		            		href="{% url 'cdetails' product.id %}"
+		            		target="blank" data-id="{{ product.id }}">
+		            		details
+		            	</a>
+		            </div>
+		            <div class="col-6 p-1">
+		            	<a class="btn col-12 text-light btn-primary modal-link btn-sm"
+		            		href="{% url 'cachats' product.id  %}"
+		            		target="blank">
+		            		ajouter
+		            	</a>
+		            </div>
+	            </div>
+	        </div>
+	        </a>
+	    </div>
+    {% endfor %}
+    </div>
+	<div class="modal fade" id="myModal">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h4 class="modal-title">Modal title</h4>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+						<span class="sr-only">Close</span>
+					</button>
+				</div>
+				<div class="modal-body">
+					<p>One fine body&hellip;</p>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+				</div>
+			</div><!-- /.modal-content -->
+		</div><!-- /.modal-dialog -->
+	</div><!-- /.modal -->
 </div>
+<script type="text/javascript">
+jQuery(document).ready(function($) {
+$('.product').on('mouseenter', function() {
+	$(this).find('.options').addClass('d-flex');
+});
+
+$('.product').on('mouseleave', function() {
+	$(this).find('.options').removeClass('d-flex');
+});
+
+$('.modal-link').on('click',function(event){
+    event.preventDefault();
+    let data_id = $(this).attr('data-id');
+    $('.modal-body').load($(this).attr('href'),function(){
+    	$('#myModal').modal('handleUpdate')
+        $('#myModal').modal({show:true});
+    });
+    $('#myModal').on('hidden.bs.modal', function () {
+    	console.log(data_id);
+	});
+}); 
+
+});
+</script>
 {% endblock main %}

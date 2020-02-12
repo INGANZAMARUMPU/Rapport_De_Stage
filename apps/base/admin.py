@@ -62,10 +62,10 @@ class PanierAdmin(admin.ModelAdmin):
 	ordering = ("recette", "commande", "quantite", "somme", "pret")
 
 class CommandeAdmin(admin.ModelAdmin):
-	list_display = ("client", "tel", "date", "a_payer", "payee", "reste", "servi", "commandee", "pret")
-	list_filter = ("client", "tel", "date", "a_payer", "payee", "reste", "servi", "commandee", "pret")
-	search_field = ("client", "tel", "date", "a_payer", "payee", "reste", "servi", "commandee", "pret")
-	ordering = ("client", "tel", "date", "a_payer", "payee", "reste", "servi", "commandee", "pret")
+	list_display = ("table", "tel", "date", "a_payer", "payee", "reste", "servi", "commandee", "pret")
+	list_filter = ("table", "tel", "date", "a_payer", "payee", "reste", "servi", "commandee", "pret")
+	search_field = ("table", "tel", "date", "a_payer", "payee", "reste", "servi", "commandee", "pret")
+	ordering = ("table", "tel", "date", "a_payer", "payee", "reste", "servi", "commandee", "pret")
 
 class PaiementAdmin(admin.ModelAdmin):
 	list_display = ("commande","somme","date")
@@ -74,6 +74,12 @@ class PaiementAdmin(admin.ModelAdmin):
 	ordering = ("commande","somme","date")
 
 class CategorieAdmin(admin.ModelAdmin):
+	list_display = ("nom",)
+	list_filter = ("nom",)
+	search_field = ("nom",)
+	ordering = ("nom",)
+
+class PlaceAdmin(admin.ModelAdmin):
 	list_display = ("nom",)
 	list_filter = ("nom",)
 	search_field = ("nom",)
@@ -102,3 +108,4 @@ admin.site.register(Nutriment, NutrimentAdmin)
 admin.site.register(Vitamine, VitamineAdmin)
 admin.site.register(Image)
 admin.site.register(Table)
+admin.site.register(Place, PlaceAdmin)

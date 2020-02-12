@@ -3,7 +3,7 @@ from django.db.models import Sum
 from django.utils import timezone
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save, pre_save
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 from random import randint
 
 class Personnel(models.Model):
@@ -23,8 +23,15 @@ class Image(models.Model):
 	schema1 = models.ImageField(upload_to="logo/")
 	schema2 = models.ImageField(upload_to="logo/")
 
+class Place(models.Model):
+	nom = models.CharField(max_length=32)
+
+	def __str__(self):
+		return self.nom
+
 class Table(models.Model):
-	user = models.OneToOneField(User, on_delete=models.CASCADE, unique=True)
+	user = models.OneToOneField(User, blank=True, on_delete=models.CASCADE, unique=True)
+	place = models.ForeignKey('Place', null=True, blank=True, on_delete=models.SET_NULL)
 	image = models.ForeignKey('Image', null=True, blank=True, on_delete=models.SET_NULL)
 	x = models.IntegerField(default=0)
 	y = models.IntegerField(default=0)
@@ -41,9 +48,14 @@ class Produit(models.Model):
 	def __str__(self):
 		return self.nom
 
+	def quantiteEnStock(self):
+		stocks = Stock.objects.filter(produit=self, expiration_date__gt=datetime.now())
+		quantite = stocks.aggregate(Sum('quantite'))['quantite__sum']
+		return quantite
+
 class Stock(models.Model):
 	produit = models.ForeignKey("Produit", on_delete=models.CASCADE)
-	offre = models.ForeignKey("Offre", null=True, on_delete=models.SET_NULL)
+	offre = models.ForeignKey("Offre", blank=True, null=True, on_delete=models.SET_NULL)
 	quantite = models.FloatField()
 	date = models.DateField(blank=True, default=timezone.now)
 	expiration = models.IntegerField(verbose_name="délais de validité(en jours)")
@@ -60,7 +72,7 @@ class Offre(models.Model):
 	prix = models.FloatField()
 
 	def __str__(self):
-		return f"{self.produit.nom} - {self.fournisseur}"
+		return f"{self.produit.nom} - {self.fournisseur} - {self.prix}"
 
 	class Meta:
 		unique_together = ('produit', 'fournisseur', 'prix')
@@ -137,37 +149,38 @@ class Recette(models.Model):
 		return randint(0, 1)
 
 class Panier(models.Model):
-	commande = models.ForeignKey("Commande", null=True, on_delete=models.CASCADE)
+	commande = models.ForeignKey("Commande", null=True, on_delete=models.CASCADE, related_name='details')
 	recette = models.ForeignKey("Recette", null=True, on_delete=models.SET_NULL)
 	quantite = models.IntegerField(default=1)
 	somme = models.IntegerField(blank=True, verbose_name='à payer')
 	pret = models.BooleanField(default=False)
 
 	def save(self, *args, **kwargs):
-		old = Panier.objects.filter(commande=self.commande, recette=self.recette)
-		if old and self.quantite:
-			last = old.last()
-			last.quantite+=self.quantite
-			self = last
 		self.somme = self.recette.prix*self.quantite
 		super(Panier, self).save(*args, **kwargs)
+
+	class Meta:
+		unique_together = ('commande','recette')
+			
 
 
 	def __str__(self):
 		return f"{self.recette}"
 
 class Commande(models.Model):
-	client = models.ForeignKey(User, default=1, on_delete=models.SET_DEFAULT)
+	table = models.ForeignKey(Table, default=1, on_delete=models.SET_DEFAULT)
 	tel = models.CharField(verbose_name='numero de télephone', blank=True, default=0, max_length=24)
 	date = models.DateField(blank=True, default=timezone.now)
-	servi = models.BooleanField(default=False)
-	commandee = models.BooleanField(default=False)
-	pret = models.BooleanField(default=False)
+	servi = models.BooleanField(default=False, blank=True)
+	commandee = models.BooleanField(default=False, blank=True)
+	pret = models.BooleanField(default=False, blank=True)
 	a_payer = models.FloatField(default=0, blank=True)
 	payee = models.FloatField(default=0, blank=True)
 	reste = models.FloatField(default=0, blank=True)
+	serveur = models.ForeignKey(User, blank=True, null=True, on_delete=models.SET_NULL)
 
 	def save(self, *args, **kwargs):
+		self.reste = self.a_payer-self.payee
 		super(Commande, self).save(*args, **kwargs)
 
 class Paiement(models.Model):
@@ -196,16 +209,21 @@ class FeedBack(models.Model):
 
 def delZeroQuantity(sender, instance, *args, **kwargs):
 	self = instance
+	commande = self.commande
 	if not self.quantite:
-		commande = self.commande
-		self.delete()
 		paniers = Panier.objects.filter(commande=commande)
+		self.delete()
 		if not paniers:
 			commande.delete()
-	else:
-		somme_comandes = Panier.objects.filter(commande=self.commande).aggregate(Sum('somme'))['somme__sum']
-		self.commande.a_payer = somme_comandes
-		self.commande.save()
+
+	if self.pret:
+		paniers = Panier.objects.filter(commande=commande, pret=False)
+		if not paniers:
+			commande.pret=True
+
+	somme_comandes = Panier.objects.filter(commande=self.commande).aggregate(Sum('somme'))['somme__sum']
+	self.commande.a_payer = somme_comandes
+	self.commande.save()
 
 # def addIfExist(sender, instance, *args, **kwargs):
 # 	self = instance

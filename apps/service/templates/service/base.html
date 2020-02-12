@@ -1,24 +1,17 @@
 {% extends "base.html" %}
-
-{% block cores %}
-<a class="nav-link" href="{% url 'service' %}">
-	<div class="sb-nav-link-icon"><i class="fas fa-tachometer-alt"></i></div>
-    Dashboard
-</a>
-{% endblock cores %}
 {% block interface %}
-<a class="nav-link" href="{% url 'spreparations' %}">
-    <div class="sb-nav-link-icon"><i class="fas fa-box"></i></div>
-    En Cours
-</a>
-<a class="nav-link" href="{% url 'sprepared' %}">
-    <div class="sb-nav-link-icon"><i class="fas fa-dolly"></i></div>
-    Déjà Près
-</a>
-<a class="nav-link" href="{% url 'srecettes' %}">
-    <div class="sb-nav-link-icon"><i class="fas fa-dolly"></i></div>
-    Recettes
-</a>
+{% for place in places %}
+    <a class="nav-link pb-0 place" data-id="{{ place.id }}" href="{% url 'service' place.id %}">
+        <div class="sb-nav-link-icon"><i class="fas fa-box"></i></div>
+        {{ place }} flat
+        <span class="badge badge-primary ml-2">0/0</span>
+    </a>
+    <a class="nav-link pt-0 place" data-id="{{ place.id }}" href="{% url 'service' place.id 1 %}">
+        <div class="sb-nav-link-icon"><i class="fas fa-box"></i></div>
+        {{ place }}
+        <span class="badge badge-primary ml-2">0/0</span>
+    </a>
+{% endfor %}
 {% endblock interface %}
 
 {% block addons %}

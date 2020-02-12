@@ -52,6 +52,7 @@
         </ul>
     </nav>
     <div id="layoutSidenav">
+        {% block navbar %}
         <div id="layoutSidenav_nav">
             <nav class="sb-sidenav accordion sb-sidenav-light" id="sidenavAccordion">
                 <div class="sb-sidenav-menu">
@@ -73,6 +74,7 @@
                 </div>
             </nav>
         </div>
+        {% endblock navbar %}
         <div id="layoutSidenav_content">
             <main>      
                 <ol class="breadcrumb mb-2 rounded-0">
@@ -120,7 +122,7 @@
     </div>
     <script src="{% static "js/bootstrap.bundle.min.js" %}" crossorigin="anonymous"></script>
     <script src="{% static "js/scripts.js" %}"></script>
-    <script type="text/javascript">
+<script type="text/javascript">
 $(document).ready(function(){
     $("#success-alert").fadeTo(3000, 500).slideUp(500, function(){
         $("#success-alert").slideUp(500);
@@ -129,8 +131,9 @@ $(document).ready(function(){
         $("#success-alert").slideUp(500);
     });
 });
-
-    </script>
+{% block scripts %}
+{% endblock scripts %}
+</script>
 </body>
 
 </html>

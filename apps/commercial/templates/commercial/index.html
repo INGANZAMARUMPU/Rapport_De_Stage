@@ -1,1 +1,99 @@
 {% extends "commercial/base.html" %}
+{% load mathfilters %}
+{% block main %}
+<div class="container">
+	<div class="row">		
+	{% for table in tables %}
+		<div class="mt-2 p-1 col-6 col-sm-4 col-md-3 col-xl-2">
+			<div class="card client-table" data-id="{{ table.id }}"
+			style='	-moz-user-select: -moz-none;
+					-khtml-user-select: none;
+					-webkit-user-select: none;'>
+				<a class="pay_link text-decoration-none " href="{% url 'cpayer' table.id %}">
+				<div class="card-body m-auto col-12 p-0">
+					<ul class="list-group text-justify list-group-flush">
+						<li class="border-0 list-group-item p-0 text-center font-weight-bold">{{ table }}</li>
+						<li class="border-0 list-group-item p-0 text-center table-orders">commandes:<span class="badge badge-primary ml-2">0</span></li>
+						<li class="border-0 list-group-item p-0 text-center table-logs">no logs</li>
+					</ul>
+				</div>
+				</a>
+			</div>
+		</div>
+	{% endfor %}
+	</div>
+	<div class="modal fade " id="myModal" role="dialog">
+	    <div class="modal-dialog">
+	        <!-- Modal content-->
+	        <div class="modal-content">
+	            <div class="modal-header">
+	                <h4 class="modal-title">Modern Restaurant paying form</h4>
+	                <button type="button" class="close" data-dismiss="modal">&times;</button>
+	            </div>
+	            <div class="modal-body">
+
+	            </div>
+	            <div class="modal-footer">
+	                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+	            </div>
+	        </div>
+	    </div>
+	</div>
+</div>
+<script type="text/javascript">
+jQuery(document).ready(function($) {
+for(let table of $(".client-table")){
+	let table_id = $(table).attr('data-id');
+	$.ajax({
+		url: '/api/commande/'+table_id+'/commands_count/',
+		type: 'GET',
+		dataType: 'json',
+	})
+	.done(function(data) {
+		$(table).find('.badge-primary').text(data.total);
+		if (parseInt(data.total) > 0) {
+			$(table).addClass('bg-success');
+			$(table).find('li').addClass('bg-success text-light');
+		}
+	})
+	.fail(function() {
+		console.log("error");
+	})
+	.always(function() {
+		console.log("complete");
+	});
+}
+// for(let place of $(".place")){
+//     let place_id = $(place).attr('data-id');
+//     $.ajax({
+//         url: '/api/commande/'+place_id+'/place_comands_count/',
+//         type: 'GET',
+//         dataType: 'json',
+//     })
+//     .done(function(data) {
+//         $(place).find('.badge-primary').text(data.total);
+//         // if (parseInt(data.to_serve) > 0) {
+//         //  $(place).addClass('bg-success');
+//         //  $(place).find('li').addClass('bg-success text-light');
+//         // }
+//     })
+//     .fail(function() {
+//         console.log("error");
+//     })
+//     .always(function() {
+//         console.log("complete");
+//     });
+// }
+
+$('.pay_link').on('click',function(event){
+    event.preventDefault();
+    $('.modal-body').load($(this).attr('href'),function(){
+    	$('#myModal').modal('handleUpdate')
+        $('#myModal').modal({show:true});
+    });
+}); 
+ 
+});	
+</script>
+{% endblock main %}				
+

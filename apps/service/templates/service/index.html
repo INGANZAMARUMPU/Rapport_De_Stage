@@ -1,25 +1,57 @@
 {% extends "service/base.html" %}
 {% load mathfilters %}
 {% block main %}
-<div class="bg-light mb-2" id="workspace" style="position:relative;width:1000px; height:500px">
+{% if ordered %}
+<div class="container">
+	<div class="row">		
 	{% for table in tables %}
-	<div class="card client-table"
-		style='	width: 120px; 
-				left:{{ table.x }}px;
+		<div class="mt-2 p-1 col-6 col-sm-4 col-md-3 col-xl-2">
+			<div class="card client-table" data-id="{{ table.id }}"
+			style='	-moz-user-select: -moz-none;
+					-khtml-user-select: none;
+					-webkit-user-select: none;'>
+				<div class="card-body m-auto col-12 p-0">
+					<ul class="list-group text-justify list-group-flush">
+						<li class="border-0 list-group-item p-0 text-center font-weight-bold">{{ table }}</li>
+						<li class="border-0 list-group-item p-0 text-center table-orders">commandes:<span class="badge badge-primary ml-2">0/0</span></li>
+						<li class="border-0 list-group-item p-0 text-center table-logs">no logs</li>
+					</ul>
+				</div>
+			</div>
+		</div>
+	{% endfor %}
+	</div>
+</div>
+{% else %}
+	<div class="bg-light mb-2" id="workspace" style="position:relative;width:1000px; height:500px">
+	{% for table in tables %}
+	<div class="card client-table" data-id="{{ table.id }}"
+		style='	left:{{ table.x }}px;
 				top:{{ table.y }}px;
 				position:absolute;
 				-moz-user-select: -moz-none;
 				-khtml-user-select: none;
 				-webkit-user-select: none;
 				cursor: grab;'>
-		<div class="card-body m-auto">
-			{{ table }}
+		<div class="card-body m-auto col-12 p-1">
+			<ul class="list-group text-justify list-group-flush">
+				<li class="border-0 list-group-item p-0 text-center font-weight-bold">{{ table }}</li>
+				<li class="border-0 list-group-item p-0 text-center table-orders">commandes:<span class="badge badge-primary ml-2">0/0</span></li>
+				<li class="border-0 list-group-item p-0 text-center table-logs">no logs</li>
+			</ul>
 		</div>
 	</div>
 	{% endfor %}
-</div>
+	</div>
+	<div class="container">
+		<input type="checkbox" class="form-check-input" id="edit_mode">
+		<label class="form-check-label" for="exampleCheck1">
+			enable edit tables positions
+		</label>
+		<div id="log">no logs</div>
+	</div>
 <script type="text/javascript">
-jQuery(document).ready(function($) {
+	jQuery(document).ready(function($) {
 	let $dragging = null;
 	let draggable = null;
 	let local_x = null;
@@ -27,24 +59,46 @@ jQuery(document).ready(function($) {
 	let global_x = null;
 	let global_y = null;
 	$(".client-table").on("mousedown", function (event) {
-		$dragging = true;
-		$(".client-table").css("z-index", 0);
-		$draggable = $(this);
-	    let offset = $(this).offset();
-	    local_x = event.pageX-offset.left;
-	    local_y = event.pageY-offset.top;
-	    $(this).css("z-index", 1);
-
+		if( $('#edit_mode').is(':checked') ){
+			$dragging = true;
+			$(".client-table").css("z-index", 0);
+			$draggable = $(this);
+		    let offset = $(this).offset();
+		    local_x = event.pageX-offset.left;
+		    local_y = event.pageY-offset.top;
+		    $(this).css("z-index", 1);
+		}
 	});
 
-	$(".client-table").parent().on("mouseup click", function (e) {
-	    $dragging = null;
-		console.log($draggable.position());
+	$(".client-table").parent().on("mouseup", function (e) {
+	    if ($dragging & $('#edit_mode').is(':checked')) {
+		    $dragging = null;
+		    let data={
+		    	x: $draggable.position().left,
+		    	y: $draggable.position().top,
+		    };
+		    console.log(data);
+		    $.ajax({
+		        	url: '/api/table/'+$draggable.attr('data-id')+"/",
+		        	type: 'PUT',
+		        	headers:{ "X-CSRFToken": $.cookie("csrftoken") },
+		        	data: data,
+		        })
+		        .done(function() {
+		        	$("#log").text("change element position success");
+		        })
+		        .fail(function() {
+		        	$("#log").text("change element position error");
+		        })
+		        .always(function() {
+		        	// $("#log").html($("#log").text()+"<br>complete!");
+		        });
+	    }
 
 	});
 
 	$(".client-table").parent().on("mousemove", function (event) {
-	    if ($dragging) {
+	    if ($dragging & $('#edit_mode').is(':checked')) {
 	    	let offset = $(this).offset();
 	    	let max_w = $(this).width()-$draggable.width();
 	    	let max_h = $(this).height()-$draggable.height();
@@ -57,7 +111,53 @@ jQuery(document).ready(function($) {
 			}
 	    }
 	});
-});
-
+	});
+</script>
+{% endif %}
+<script type="text/javascript">
+jQuery(document).ready(function($) {
+	for(let table of $(".client-table")){
+		let table_id = $(table).attr('data-id');
+		$.ajax({
+			url: '/api/commande/'+table_id+'/commands_count/',
+			type: 'GET',
+			dataType: 'json',
+		})
+		.done(function(data) {
+			$(table).find('.badge-primary').text(data.to_serve+"/"+data.total);
+			if (parseInt(data.to_serve) > 0) {
+				$(table).addClass('bg-success');
+				$(table).find('li').addClass('bg-success text-light');
+			}
+		})
+		.fail(function() {
+			console.log("error");
+		})
+		.always(function() {
+			console.log("complete");
+		});
+	}
+	for(let place of $(".place")){
+		let place_id = $(place).attr('data-id');
+		$.ajax({
+			url: '/api/commande/'+place_id+'/place_comands_count/',
+			type: 'GET',
+			dataType: 'json',
+		})
+		.done(function(data) {
+			$(place).find('.badge-primary').text(data.to_serve+"/"+data.total);
+			// if (parseInt(data.to_serve) > 0) {
+			// 	$(place).addClass('bg-success');
+			// 	$(place).find('li').addClass('bg-success text-light');
+			// }
+		})
+		.fail(function() {
+			console.log("error");
+		})
+		.always(function() {
+			console.log("complete");
+		});
+	}
+});	
 </script>
 {% endblock main %}				

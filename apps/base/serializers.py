@@ -6,6 +6,11 @@ class ProduitSerializer(serializers.ModelSerializer):
 		model = Produit
 		fields = "__all__"
 
+class TableSerializer(serializers.ModelSerializer):
+	class Meta:
+		model = Table
+		fields = "__all__"
+
 class StockSerializer(serializers.ModelSerializer):
 	class Meta:
 		model = Stock
@@ -32,9 +37,22 @@ class PanierSerializer(serializers.ModelSerializer):
 		fields = "__all__"
 
 class CommandeSerializer(serializers.ModelSerializer):
+	details = PanierSerializer(many=True, read_only=True)
 	class Meta:
 		model = Commande
+		fields = ("table", "details", "tel", "date", "servi", "commandee", "pret", "a_payer", "payee", "reste", "serveur")
+
+class DeepPanierSerializer(serializers.ModelSerializer):
+	class Meta:
+		model = Panier
 		fields = "__all__"
+		depth = 1
+
+class DeepCommandeSerializer(serializers.ModelSerializer):
+	details = DeepPanierSerializer(many=True, read_only=True)
+	class Meta:
+		model = Commande
+		fields = ("table", "details", "tel", "date", "servi", "commandee", "pret", "a_payer", "payee", "reste", "serveur")
 
 class PaiementSerializer(serializers.ModelSerializer):
 	class Meta:
