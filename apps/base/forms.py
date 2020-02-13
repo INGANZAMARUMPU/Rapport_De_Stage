@@ -14,6 +14,18 @@ class ProduitForm(forms.ModelForm):
 		model = Produit
 		fields = "__all__"
 
+class OffreForm(forms.ModelForm):
+	fournisseur = forms.ModelChoiceField(
+		widget = forms.Select(
+			attrs={'placeholder': 'fournisseur', 'class':'form-control'}),
+		queryset = Fournisseur.objects.all())
+	prix = forms.CharField(
+		widget=forms.NumberInput(
+			attrs={'placeholder':'prix', 'class':'form-control'}))
+	class Meta:
+		model = Offre
+		fields = ("fournisseur", "prix")
+
 class StockForm(forms.ModelForm):
 	offre = forms.ModelChoiceField(
 		widget = forms.Select(

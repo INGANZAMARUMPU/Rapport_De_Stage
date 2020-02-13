@@ -18,7 +18,7 @@
         </a>
     </div>
     <div class="col-xl-4 col-sm-6 col-12 p-1">
-        <a href="/admin/base/fournisseurs" target="blank" class="text-decoration-none">
+        <a href="/admin/base/fournisseur" target="blank" class="text-decoration-none">
         <div class="rounded bg-success">     
             <div class="text-center text-light">gerer</div>
             <div class="text-center text-light font-weight-bold">les fournisseurs</div>
@@ -27,27 +27,31 @@
     </div>
     <div class="row m-1 p-0">
     {% for product in products %}
-	    <div class="col-xl-4 col-sm-6 col-12 p-1 product">
-	        <a href="/admin/base/stock/?produit__id__exact={{ product.id }}"
-	        	class="text-decoration-none" target="blank">
+	    <div class="col-xl-4 col-sm-6 col-12 p-1 product" data-id="{{ product.id }}">
+	        <a class="text-decoration-none modal-link"
+		        href="{% url 'cdetails' product.id %}"
+		        target="blank">
 	        <div class="rounded bg-light m-0">  
 	            <div class="text-center font-weight-bold">{{ product.nom }} {{ class.section }} </div>
 	            <div class="text-center"> 
-	                {{ product.quantiteEnStock|default:0 }} {{ product.unite }}
+	            	<span class="quantite-stock">
+	                {{ product.quantiteEnStock|default:0 }}
+	            	</span>
+	            	 {{ product.unite }}
 	            </div>
-	            <div class="row col-12 p-1 m-0 d-none options">
+	            <div class="row col-12 p-1 m-0 d-flex d-lg-none options">
 		            <div class="col-6 p-1">
 		            	<a class="btn col-12 text-light btn-secondary btn-sm modal-link"
-		            		href="{% url 'cdetails' product.id %}"
+		            		href="{% url 'coffre' product.id %}"
 		            		target="blank" data-id="{{ product.id }}">
-		            		details
+		            		<i class="fas fa-plus"></i> offre
 		            	</a>
 		            </div>
 		            <div class="col-6 p-1">
 		            	<a class="btn col-12 text-light btn-primary modal-link btn-sm"
 		            		href="{% url 'cachats' product.id  %}"
 		            		target="blank">
-		            		ajouter
+		            		s'approvisionner
 		            	</a>
 		            </div>
 	            </div>
@@ -79,24 +83,58 @@
 <script type="text/javascript">
 jQuery(document).ready(function($) {
 $('.product').on('mouseenter', function() {
-	$(this).find('.options').addClass('d-flex');
+	$(this).find('.options').addClass('d-lg-flex');
 });
 
 $('.product').on('mouseleave', function() {
-	$(this).find('.options').removeClass('d-flex');
+	$(this).find('.options').removeClass('d-lg-flex');
 });
 
 $('.modal-link').on('click',function(event){
     event.preventDefault();
-    let data_id = $(this).attr('data-id');
+    let $lbl_stock = $(this).closest('.product').find('.quantite-stock');
+    let data_id = $(this).closest('.product').attr('data-id');
     $('.modal-body').load($(this).attr('href'),function(){
     	$('#myModal').modal('handleUpdate')
         $('#myModal').modal({show:true});
     });
     $('#myModal').on('hidden.bs.modal', function () {
     	console.log(data_id);
+    	$.ajax({
+    		url: '/api/stock/quantite/'+data_id,
+    		type: 'GET',
+    		dataType: 'json',
+    	})
+    	.done(function(data) {
+    		console.log($(this));
+    		$lbl_stock.text(data.quantite);
+    	})
+    	.fail(function() {
+    		console.log("error");
+    	})
+    	.always(function() {
+    		console.log("complete");
+    	});
+    	
 	});
 }); 
+$('#myModal').on("submit", "#modal-form", function (e) {
+	e.preventDefault();
+	$.ajax({
+		url: $(this).attr('action'),
+		type: 'POST',
+		data: $(this).serialize(),
+	})
+	.done(function() {
+		alert("success");
+	})
+	.fail(function() {
+		console.log("error");
+	})
+	.always(function() {
+	});
+	
+});  
 
 });
 </script>

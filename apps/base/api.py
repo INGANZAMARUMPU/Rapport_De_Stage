@@ -24,6 +24,14 @@ class StockViewset(viewsets.ModelViewSet):
 	queryset = Stock.objects.all()
 	serializer_class = StockSerializer
 
+	@action(methods=['GET'], detail=False,
+		url_path=r'quantite/(?P<product_id>[0-9]+)',
+		url_name="quantite_total")
+	def quantiteTotal(self, request, product_id):
+		stocks = Stock.objects.filter(produit=product_id)
+		somme = stocks.aggregate(Sum('quantite'))['quantite__sum']
+		return Response({'quantite':somme})
+
 class FournisseurViewset(viewsets.ModelViewSet):
 	authentication_classes = [SessionAuthentication]
 	permission_classes = [IsAuthenticated]

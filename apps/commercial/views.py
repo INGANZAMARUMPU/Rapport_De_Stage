@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from django.db.models import Sum
+from django.contrib import messages
 
 from apps.base.models import *
 from apps.base.forms import *
@@ -28,13 +29,27 @@ def stock(request):
 	return render(request, 'commercial/stock.html', locals())
 	
 def achats(request, product_id):
-	form = StockForm(product_id, request.POST)
+	achat_form = StockForm(product_id, request.POST)
 	if request.method == "POST":
-		stock = form.save(commit=False)
-		stock.personnel = request.user.personnel
-		stock.save()
-	form = StockForm(product_id)
-	return render(request, 'commercial/achats.html', locals())
+		if achat_form.is_valid():
+			stock = achat_form.save(commit=False)
+			stock.personnel = request.user.personnel
+			stock.produit = Produit.objects.get(id = product_id)
+			stock.save()
+			messages.success(request, "approvisionnement effectuée")
+	achat_form = StockForm(product_id)
+	return render(request, 'commercial/form.html', locals())
+	
+def offre(request, product_id):
+	offre_form = OffreForm(request.POST)
+	if request.method == "POST":
+		if offre_form.is_valid():
+			offre = offre_form.save(commit=False)
+			offre.produit = Produit.objects.get(id = product_id)
+			offre.save()
+			messages.success(request, "offre ajoutée avec succes")
+	offre_form = OffreForm()
+	return render(request, 'commercial/form.html', locals())
 
 def details(request, product_id):
 	stocks = Stock.objects.filter(produit = product_id)
