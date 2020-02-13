@@ -58,7 +58,7 @@
 	let local_y = null;
 	let global_x = null;
 	let global_y = null;
-	$(".client-table").on("mousedown", function (event) {
+	$(".client-table").on("mousedown touchstart", function (event) {
 		if( $('#edit_mode').is(':checked') ){
 			$dragging = true;
 			$(".client-table").css("z-index", 0);
@@ -70,7 +70,7 @@
 		}
 	});
 
-	$(".client-table").parent().on("mouseup", function (e) {
+	$(".client-table").parent().on("mouseup touchend", function (e) {
 	    if ($dragging & $('#edit_mode').is(':checked')) {
 		    $dragging = null;
 		    let data={
@@ -97,7 +97,7 @@
 
 	});
 
-	$(".client-table").parent().on("mousemove", function (event) {
+	$(".client-table").parent().on("mousemove touchmove", function (event) {
 	    if ($dragging & $('#edit_mode').is(':checked')) {
 	    	let offset = $(this).offset();
 	    	let max_w = $(this).width()-$draggable.width();
