@@ -51,8 +51,8 @@ class VitamineAdmin(admin.ModelAdmin):
 
 class RecetteAdmin(admin.ModelAdmin):
 	list_display = ("nom", "temp", "image", "prix", "details")
-	list_filter = ("nom", "temp", "image", "prix", "details")
-	search_field = ("nom", "temp", "image", "prix", "details")
+	list_filter = ("nom", "temp", "image", "prix", "details", "ingredient")
+	search_field = ("nom", "temp", "image", "prix", "details", "ingredient")
 	ordering = ("nom", "temp", "image", "prix", "details")
 
 class PanierAdmin(admin.ModelAdmin):

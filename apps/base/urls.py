@@ -15,6 +15,7 @@ router.register("deep_panier", DeepPanierViewSet)
 router.register("paiement", PaiementViewset)
 router.register("feedBack", FeedBackViewset)
 router.register("table", TableViewset)
+router.register("chartservice", ChartServiceViewset, basename='chartserv')
 
 urlpatterns = [
     path("api/", include(router.urls)),

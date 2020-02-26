@@ -1,0 +1,87 @@
+{% extends "cuisine/base.html" %}
+{% block main %}
+<div class="row">
+    <div class="row m-1 p-0">
+    {% for product in products %}
+	    <div class="col-xl-4 col-sm-6 col-12 p-1 product" data-id="{{ product.id }}">
+	        <a class="text-decoration-none modal-link 
+	            	{% if not product.quantiteEnStock or product.quantiteEnStock == 0 %}
+	            		text-danger
+	            	{% elif product.quantiteEnStock < 5 %}
+	            		text-success
+	            	{% else %}
+	            		text-primary
+	            	{% endif %}"
+		        href="{% url 'cuidetails' product.id %}"
+		        target="blank">
+	        <div class="rounded bg-light m-0">  
+	            <div class="text-center font-weight-bold">{{ product.nom }} {{ class.section }} </div>
+	            <div class="text-center"> 
+	            	<span class="quantite-stock">
+	                {{ product.quantiteEnStock|default:0 }}
+	            	</span>
+	            	 {{ product.unite }}
+	            </div>
+	            <!-- <div class="text-center {% if not product.quantiteEnStock %}d-none{% endif %}"> 
+	            	<span> repas suspendues: </span>
+	            	0
+	            </div> -->
+	        </div>
+	        </a>
+	    </div>
+    {% endfor %}
+    </div>
+	<div class="modal fade" id="myModal">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h4 class="modal-title">Modal title</h4>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+						<span class="sr-only">Close</span>
+					</button>
+				</div>
+				<div class="modal-body">
+					<p>One fine body&hellip;</p>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+				</div>
+			</div><!-- /.modal-content -->
+		</div><!-- /.modal-dialog -->
+	</div><!-- /.modal -->
+</div>
+<script type="text/javascript">
+jQuery(document).ready(function($) {
+
+$('.modal-link').on('click',function(event){
+    event.preventDefault();
+    $('.modal-body').load($(this).attr('href'),function(){
+    	$('#myModal').modal('handleUpdate')
+        $('#myModal').modal({show:true});
+    });
+});
+
+// eviter que la soumission des formulaires ouvrent d'autres
+// une nouvelle link 
+$('#myModal').on("submit", "#modal-form", function (e) {
+	e.preventDefault();
+	$.ajax({
+		url: $(this).attr('action'),
+		type: 'POST',
+		data: $(this).serialize(),
+	})
+	.done(function() {
+		alert("success");
+	})
+	.fail(function() {
+		console.log("error");
+	})
+	.always(function() {
+	});
+	
+});  
+
+});
+</script>
+{% endblock main %}

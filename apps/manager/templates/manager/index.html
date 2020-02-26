@@ -1,1 +1,133 @@
 {% extends "manager/base.html" %}
+{% block main %}
+
+
+<div class="row m-2">
+	<div class="col-6 mt-2">
+		<div class="card">
+			<div class="card-body">
+				<h2>courbe service</h2>
+			</div>
+			<div class="card-body mt-0 pt-0">
+				<canvas id="chartService" class="bg-light col-12"></canvas>
+			</div>
+		</div>
+	</div>
+	<div class="col-6 mt-2">
+		<div class="card">
+			<div class="card-body">
+				<h2>bar service</h2>
+			</div>
+			<div class="card-body mt-0 pt-0">
+				<canvas id="barsService" class="bg-light col-12"></canvas>
+			</div>
+		</div>
+	</div>
+	<div class="col-6 mt-2">
+		<div class="card">
+			<div class="card-body">
+				<h2>courbe depenses</h2>
+			</div>
+			<div class="card-body mt-0 pt-0">
+				<canvas id="chartService" class="bg-light col-12"></canvas>
+			</div>
+		</div>
+	</div>
+	<div class="col-6 mt-2">
+		<div class="card">
+			<div class="card-body">
+				<h2>bar depenses</h2>
+			</div>
+			<div class="card-body mt-0 pt-0">
+				<canvas id="barsService" class="bg-light col-12"></canvas>
+			</div>
+		</div>
+	</div>
+	<div class="col-6 mt-2">
+		<div class="card">
+			<div class="card-body">
+				<h2>bar votes</h2>
+			</div>
+			<div class="card-body mt-0 pt-0">
+				<canvas id="barsService" class="bg-light col-12"></canvas>
+			</div>
+		</div>
+	</div>
+	<div class="col-6 mt-2">
+		<div class="card">
+			<div class="card-body">
+				<h2>bar recette modale</h2>
+			</div>
+			<div class="card-body mt-0 pt-0">
+				<canvas id="barsService" class="bg-light col-12"></canvas>
+			</div>
+		</div>
+	</div>
+</div>
+<script type="text/javascript">
+// let $chartCuisine = $('#chartCuisine').getContext('2d');
+let $chartService = document.getElementById('chartService').getContext('2d');
+let $barsService = document.getElementById('barsService').getContext('2d');
+
+let chartService = new Chart($chartService, {
+	type:'line',
+	data:{
+		labels:[],
+		datasets:[]
+	}
+})
+let barsService = new Chart($barsService, {
+	type:'bar',
+	data:{
+		labels:[],
+		datasets:[]
+	}
+})
+let randomColorGenerator = function () { 
+    return '#' + (Math.random().toString(16) + '0000000').slice(2, 8); 
+};
+// charts Services
+$.ajax({
+	url: "/api/chartservice/service_labels/",
+	type: 'GET',
+	dataType: 'json',
+})
+.done(function(data) {
+	let labels = data;
+	chartService.data.labels = labels;
+	$.ajax({
+		url: '/api/chartservice/service/',
+		type: 'GET',
+		dataType: 'json',
+	})
+	.done(function(data) {
+		color = randomColorGenerator();
+		for(let el of data){
+			el.borderColor=randomColorGenerator();
+		};
+		chartService.data.datasets = data;
+		chartService.update();
+	});
+});
+//=====================================================
+// bar services
+$.ajax({
+	url: '/api/chartservice/servicegroupesdefault/',
+	type: 'GET',
+	dataType: 'json',
+})
+.done(function(data) {
+	let dict = {'data':data.data, backgroundColor:[]}
+	dict.label = 'nombre servi';
+	barsService.data.labels = data.labels;
+	for(let el of data.data){
+		dict.backgroundColor.push(randomColorGenerator());
+	}
+	barsService.data.datasets = [dict];
+
+	console.log(barsService.data);
+	barsService.update();
+});
+
+</script>
+{% endblock main %}

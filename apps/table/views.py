@@ -49,4 +49,6 @@ def cart(request):
 	carts = Panier.objects.filter(commande=commande)
 	n_carts = carts.count()
 	prix_total = commande.a_payer
+	commandes = Commande.objects.filter(table=table,\
+	commandee=True, payee__lt=1)
 	return render(request, 'table/panier.html', locals())

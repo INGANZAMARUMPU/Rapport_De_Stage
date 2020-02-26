@@ -27,11 +27,19 @@
     </div>
     <div class="row m-1 p-0">
     {% for product in products %}
-	    <div class="col-xl-4 col-sm-6 col-12 p-1 product" data-id="{{ product.id }}">
-	        <a class="text-decoration-none modal-link"
+	    <div class="col-xl-4 col-sm-6 col-12 p-1 product" 
+	    	data-id="{{ product.id }}">
+	        <a class="text-decoration-none modal-link 
+	            	{% if not product.quantiteEnStock or product.quantiteEnStock == 0 %}
+	            		text-danger
+	            	{% elif product.quantiteEnStock < 5 %}
+	            		text-success
+	            	{% else %}
+	            		text-primary
+	            	{% endif %}"
 		        href="{% url 'cdetails' product.id %}"
 		        target="blank">
-	        <div class="rounded bg-light m-0">  
+	        <div class="rounded m-0 bg-light">  
 	            <div class="text-center font-weight-bold">{{ product.nom }} {{ class.section }} </div>
 	            <div class="text-center"> 
 	            	<span class="quantite-stock">
@@ -82,6 +90,7 @@
 </div>
 <script type="text/javascript">
 jQuery(document).ready(function($) {
+
 $('.product').on('mouseenter', function() {
 	$(this).find('.options').addClass('d-lg-flex');
 });
@@ -92,6 +101,7 @@ $('.product').on('mouseleave', function() {
 
 $('.modal-link').on('click',function(event){
     event.preventDefault();
+    let modal_link = $(this);
     let $lbl_stock = $(this).closest('.product').find('.quantite-stock');
     let data_id = $(this).closest('.product').attr('data-id');
     $('.modal-body').load($(this).attr('href'),function(){
@@ -108,6 +118,15 @@ $('.modal-link').on('click',function(event){
     	.done(function(data) {
     		console.log($(this));
     		$lbl_stock.text(data.quantite);
+	        if(product.quantite == 0){
+	            modal-link.addClass('text-danger');
+	        }
+	        else if( data.quantite < 5){
+	            modal-link.addClass('text-success');
+	        }
+	        else{
+	        	modal-link.addClass('text-primary');
+	        }
     	})
     	.fail(function() {
     		console.log("error");

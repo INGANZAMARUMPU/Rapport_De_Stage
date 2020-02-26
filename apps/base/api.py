@@ -9,9 +9,106 @@ from django.shortcuts import render
 from django.db.models import F
 
 from .models import *
+from django.contrib.auth.models import Group
+from datetime import date, timedelta, datetime
 from .serializers import *
+from django.db.models import Count
 
 # Create your views here.
+class ChartServiceViewset(viewsets.ViewSet):
+	authentication_classes = [SessionAuthentication]
+	permission_classes = [IsAuthenticated]
+
+	@action(methods=['GET'], detail=False, url_path=r'cuisine', url_name="chart_cuisine")
+	def cuisine(self, request):
+		return Response({'chart':"cuisine"})
+
+	@action(methods=['GET'], detail=False, url_name="chart_service",
+		url_path=r'servicedu(?P<debut>(\d{1,4}[-]?){3})au(?P<fin>(\d{1,4}[-]?){3})', )
+	def servicedetail(self, request, debut, fin):
+		service = Group.objects.get(name='service')
+		serveurs = User.objects.filter(groups__in=[service])
+
+		fin = datetime.strptime(fin, "%Y-%m-%d")
+		debut = datetime.strptime(debut, "%Y-%m-%d")
+		delta = fin - debut
+		data= []
+		for serveur in serveurs:
+			services = []
+			for i in range(delta.days+1):
+				date = debut + timedelta(days=i)
+				service = Commande.objects.filter(
+					serveur=serveur, date= date).values('serveur', 'date')\
+					.annotate(Count('pk'))
+				if service:
+					services.append(service[0]["pk__count"])
+				else:
+					services.append(0)
+
+			data.append({'label':serveur.username, 'data':services})
+		return Response(data)
+
+	@action(methods=['GET'], detail=False, url_path=r'service', url_name="chart_service_detail")
+	def service(self, request):
+		fin = datetime.today()
+		debut = fin - timedelta(days=20)
+		fin = fin.strftime("%Y-%m-%d")
+		debut = debut.strftime("%Y-%m-%d")
+		return self.servicedetail(request, debut, fin)
+
+	@action(methods=['GET'], detail=False, url_path=r'service_labels', url_name="chart_service_labels")
+	def servicel(self, request):
+		data = []
+		fin = datetime.today()
+		debut = fin - timedelta(days=20)
+		for a in range(1,8):
+			date = debut + timedelta(days=a)
+			data.append(date.strftime("%Y-%m-%d"))
+		return Response(data)
+
+	@action(methods=['GET'], detail=False, url_name="chart_service_labels",
+		url_path=r'servicelabelsdu(?P<debut>(\d{1,4}[-]?){3})au(?P<fin>(\d{1,4}[-]?){3})', )
+	def servicedetaill(self, request, debut, fin):
+		fin = datetime.strptime(fin, "%Y-%m-%d")
+		debut = datetime.strptime(debut, "%Y-%m-%d")
+		delta = fin - debut
+		data= []
+		for a in range(delta.days+1):
+			date = debut + timedelta(days=a)
+			data.append(date.strftime("%Y-%m-%d"))
+		return Response(data)
+
+	@action(methods=['GET'], detail=False, url_name="groupe_service",
+		url_path=r'servicegroupesdu(?P<debut>(\d{1,4}[-]?){3})au(?P<fin>(\d{1,4}[-]?){3})', )
+	def servicegroupe(self, request, debut, fin):
+		service = Group.objects.get(name='service')
+		serveurs = User.objects.filter(groups__in=[service])
+		labels, data = [], []
+		for serveur in serveurs:
+			commandes = Commande.objects.filter(date__gte=debut, serveur=serveur, date__lte=fin)\
+				.values('serveur').annotate(Count('serveur'))
+			labels.append(serveur.username)
+			if commandes:
+				data.append(commandes[0]["serveur__count"])
+			else:
+				data.append(0)
+
+		print(labels, data)
+		return Response({'labels':labels, 'data':data})
+
+	@action(methods=['GET'], detail=False, url_name="groupe_service_default",
+		url_path=r'servicegroupesdefault', )
+	def servicegroupedefault(self, request):
+		fin = datetime.today()
+		debut = fin - timedelta(days=20)
+		fin = fin.strftime("%Y-%m-%d")
+		debut = debut.strftime("%Y-%m-%d")
+		return self.servicegroupe(request, debut, fin)
+
+class ChartEnteeSortie(viewsets.ViewSet):
+	authentication_classes = [SessionAuthentication]
+	permission_classes = [IsAuthenticated]
+
 class ProduitViewset(viewsets.ModelViewSet):
 	authentication_classes = [SessionAuthentication]
 	permission_classes = [IsAuthenticated]
@@ -25,12 +122,31 @@ class StockViewset(viewsets.ModelViewSet):
 	serializer_class = StockSerializer
 
 	@action(methods=['GET'], detail=False,
-		url_path=r'quantite/(?P<product_id>[0-9]+)',
+		url_path=r'quantite/(?P<stock_id>[0-9]+)',
 		url_name="quantite_total")
-	def quantiteTotal(self, request, product_id):
-		stocks = Stock.objects.filter(produit=product_id)
-		somme = stocks.aggregate(Sum('quantite'))['quantite__sum']
-		return Response({'quantite':somme})
+	def quantiteTotal(self, request, stock_id):
+		# stocks = Stock.objects.filter(produit=self,
+		# 	quantite__gt=0, 
+		# 	expiration_date__gt=datetime.now())
+		# quantite = stocks.aggregate(Sum('quantite'))['quantite__sum']
+		stock = Stock.objects.get(id=stock_id)
+		return Response({'quantite':stock.produit.quantiteEnStock()})
+
+	@action(methods=["GET"],
+		url_path=r"requisition/(?P<stock_id>[0-9]+)",
+		url_name="api_requisition", detail=False)
+	def requisition(self, request, stock_id):
+		stock = Stock.objects.get(id=stock_id)
+		
+		if stock.quantite<stock.produit.quantiteEnStock():
+			stock.is_valid = True
+			stock.save()
+		else:
+			stock.quantite = stock.produit.quantiteEnStock()
+			stock.is_valid = True
+			stock.save()	
+		
+		return Response({"reste":stock.produit.quantiteEnStock()})
 
 class FournisseurViewset(viewsets.ModelViewSet):
 	authentication_classes = [SessionAuthentication]

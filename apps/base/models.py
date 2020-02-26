@@ -49,22 +49,31 @@ class Produit(models.Model):
 		return self.nom
 
 	def quantiteEnStock(self):
-		stocks = Stock.objects.filter(produit=self, expiration_date__gt=datetime.now())
+		stocks = Stock.objects.filter(produit=self,
+			is_valid=True)
 		quantite = stocks.aggregate(Sum('quantite'))['quantite__sum']
 		return quantite
+
+	class Meta:
+		ordering = ["nom"]
 
 class Stock(models.Model):
 	produit = models.ForeignKey("Produit", on_delete=models.CASCADE)
 	offre = models.ForeignKey("Offre", blank=True, null=True, on_delete=models.SET_NULL)
 	quantite = models.FloatField()
 	date = models.DateField(blank=True, default=timezone.now)
-	expiration = models.IntegerField(verbose_name="délais de validité(en jours)")
-	expiration_date = models.DateField(editable=False)
-	personnel = models.ForeignKey("Personnel", null=True, on_delete=models.SET_NULL)
+	expiration = models.IntegerField(null=True, verbose_name="délais de validité(en jours)")
+	expiration_date = models.DateField(editable=False, null=True)
+	personnel = models.ForeignKey("Personnel", default=1, on_delete=models.SET_DEFAULT)
+	is_valid = models.BooleanField(default=True)
 
 	def save(self, *args, **kwargs):
-		self.expiration_date=self.date+timedelta(days=self.expiration)
+		if self.expiration:
+			self.expiration_date=self.date+timedelta(days=self.expiration)
 		super(Stock, self).save(*args, **kwargs)
+
+	class Meta:
+		ordering = ["produit"]
 
 class Offre(models.Model):
 	produit = models.ForeignKey("Produit", null=True, on_delete=models.SET_NULL)
@@ -138,7 +147,7 @@ class Recette(models.Model):
 	prix = models.IntegerField()
 	image = models.ImageField(upload_to="recettes/")
 	categorie = models.ForeignKey("Categorie", null=True, on_delete=models.SET_NULL)
-	disponibles = models.IntegerField(verbose_name="quantité dispo")
+	disponible = models.BooleanField(default=True)
 	details = models.URLField(null=True, blank=True)
 
 	def __str__(self):
@@ -162,8 +171,6 @@ class Panier(models.Model):
 	class Meta:
 		unique_together = ('commande','recette')
 			
-
-
 	def __str__(self):
 		return f"{self.recette}"
 
@@ -182,6 +189,9 @@ class Commande(models.Model):
 	def save(self, *args, **kwargs):
 		self.reste = self.a_payer-self.payee
 		super(Commande, self).save(*args, **kwargs)
+
+	def paniers(self):
+		return Panier.objects.filter(commande=self)
 
 class Paiement(models.Model):
 	commande = models.ForeignKey("Commande", null=True, on_delete=models.SET_NULL)

@@ -14,6 +14,18 @@ class ProduitForm(forms.ModelForm):
 		model = Produit
 		fields = "__all__"
 
+class RequisitionForm(forms.Form):
+    produit = forms.ModelChoiceField(
+        widget = forms.Select(
+        	attrs = {'placeholder': '', 'class': 'form-control col-12'}
+        	),
+        queryset = Produit.objects.all(),
+        label = 'produit')
+    quantite = forms.FloatField(
+    	widget=forms.NumberInput(
+    		attrs={'step': "0.01", 'placeholder':'quantite','class':'form-control col-12'}
+    		))
+
 class OffreForm(forms.ModelForm):
 	fournisseur = forms.ModelChoiceField(
 		widget = forms.Select(

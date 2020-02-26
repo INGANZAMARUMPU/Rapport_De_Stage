@@ -1,0 +1,36 @@
+{% extends "cuisine/base.html" %}
+{% load static %}
+{% block main %}
+<div class="col-lg-8 col-md-10 offset-lg-2 offset-md-1">
+<script src="{% static "js/jquery.formset.js" %}" crossorigin="anonymous"></script>
+    <form method="post" action="" >
+        {% csrf_token %}
+          <fieldset>
+          {# <legend>Contact Details</legend> #}
+
+            {{ form_set.management_form }}
+            {% for form in form_set %}
+            <div class="link-formset">
+              <div class="row text-dark">
+                {% for field in form %}
+                  <div class="input-group mb-3 input-group-sm col-6">
+                    <div class="input-group-prepend">
+                      <span class="input-group-text">{{ field.label }}</span>
+                    </div>
+                      {{ field }}
+                  </div>
+                {% endfor %}
+              </div>
+            </div>
+            {% endfor %}
+            <script>
+              $('.link-formset').formset({addText: 'ajouter un autre produit',deleteText: 'enlever', addCssClass:''});
+              
+            </script>
+        </fieldset>
+      <div class="col-xl-4 col-lg-6 col-12">
+          <input type="submit" value="Submit" name="quit" class="btn btn-outline-primary btn-sm col-xl-12 col-lg-12 col-12 my-4"/>
+      </div>
+  </form>
+</div>
+{% endblock %}

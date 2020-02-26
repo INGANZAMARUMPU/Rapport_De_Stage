@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block body %}
+<div style="background-color:cadetblue">
+    <main>
+        <div class="container p-2">
+            <div class="row justify-content-center">
+                <div class="col-12">
+                	<table class="table table-inverse table-light table-striped table-sm">
+                		<thead>
+                			<tr>
+                				<th>recette</th>
+                				<th>commandable</th>
+                			</tr>
+                		</thead>
+                		<tbody>
+                			{% for recette in recettes %}
+                			<tr>
+                				<td>{{ recette.nom }}</td>
+                				<td>
+                                    <input data-id={{ recette.id }} type="checkbox" {% if recette.disponible %}checked{% endif %} class="is_dispo">
+                                </td>
+                			</tr>                				
+                			{% endfor %}
+                		</tbody>
+                	</table>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+<script type="text/javascript">
+jQuery(document).ready(function($) {
+
+$(".is_dispo").on('change', function(event) {
+    let recette_id = $(this).attr('data-id');
+    let dispo = $(this).is(":checked");
+    let data = {"disponible":dispo};
+    let tr = $(this).closest('tr');
+    $.ajax({
+        url: '/api/recette/'+recette_id+'/',
+        type: 'PATCH',
+        dataType: 'json',
+        data: data,
+        headers : {'X-CSRFToken':$.cookie('csrftoken')}
+    })
+    .done(function() {
+        tr.toggleClass('text-success')
+    })
+    .fail(function() {
+        tr.toggleClass('text-danger')
+    })
+    
+});
+
+});
+</script>
+{% endblock body %}

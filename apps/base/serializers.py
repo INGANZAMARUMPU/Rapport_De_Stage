@@ -32,9 +32,13 @@ class RecetteSerializer(serializers.ModelSerializer):
 		fields = "__all__"
 
 class PanierSerializer(serializers.ModelSerializer):
+	nom = serializers.SerializerMethodField()
+	def get_nom(self, obj):
+		return obj.recette.nom
+
 	class Meta:
 		model = Panier
-		fields = "__all__"
+		fields = "id", "quantite", "somme", "pret", "commande", "recette", 'nom'
 
 class CommandeSerializer(serializers.ModelSerializer):
 	details = PanierSerializer(many=True, read_only=True)

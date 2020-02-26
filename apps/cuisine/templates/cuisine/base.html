@@ -7,6 +7,14 @@
 </a>
 {% endblock cores %}
 {% block interface %}
+<a class="nav-link" href="{% url 'cuistock' %}">
+	<div class="sb-nav-link-icon"><i class="fas fa-tachometer-alt"></i></div>
+    Stock
+</a>
+<a class="nav-link" href="{% url 'cuirequisition' %}">
+	<div class="sb-nav-link-icon"><i class="fas fa-tachometer-alt"></i></div>
+    Requisition
+</a>
 {% endblock interface %}
 
 {% block addons %}
@@ -14,8 +22,4 @@
     <div class="sb-nav-link-icon"><i class="fas fa-table"></i></div>
     Tables
 </a>
-</script>
-<script type="text/javascript">
-	$("body").addClass('sb-sidenav-toggled');
-</script>
 {% endblock addons %}

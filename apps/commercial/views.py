@@ -28,6 +28,10 @@ def stock(request):
 	products = Produit.objects.all()
 	return render(request, 'commercial/stock.html', locals())
 	
+def requisition(request):
+	requisitions = Stock.objects.filter(is_valid=False, quantite__lt=0)
+	return render(request, 'commercial/requisition.html', locals())
+	
 def achats(request, product_id):
 	achat_form = StockForm(product_id, request.POST)
 	if request.method == "POST":

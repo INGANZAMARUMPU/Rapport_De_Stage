@@ -1,0 +1,127 @@
+{% extends "commercial/base.html" %}
+{% load mathfilters %}
+{% block main %}
+{% if requisitions %}
+	<table class="table table-hover table-sm" data-id="{{ commande.id }}" id="commande">
+		<thead>
+			<tr>
+				<th scope="col">produit</th>
+				<th scope="col">Q Dispo</th>
+				<th scope="col">Q. demandé</th>
+				<th scope="col">Quantité</th>
+			</tr>
+		</thead>
+		<tbody>
+			{% for r in requisitions %}
+			<tr class="requisition-item" data-id="{{ r.id }}">
+				<td> {{ r.produit }}</td>
+				<td> {{ r.produit.quantiteEnStock|default:0 }}</td>
+				<td> {{ r.quantite|mul:-1 }}</td>
+				<td>
+					{% if r.quantite|mul:-1 < r.produit.quantiteEnStock %}
+						{{ r.quantite|mul:-1 }}
+					{% else %}
+						{{ r.produit.quantiteEnStock }}
+					{% endif %}
+				</td>
+			</tr>
+			{% endfor %}
+		</tbody>
+		<tfoot>
+			<tr>
+				<th scope="col"></th>
+				<th scope="col"></th>
+				<th scope="col"></th>
+				<th scope="col">
+					<button class="btn btn-primary btn-sm" id="commander">approuver</button>
+				</th>
+			</tr>
+		</tfoot>
+	</table>
+{% endif %}
+<script type="text/javascript">
+$(document).ready(function(){
+let csrf = $("#csrftoken").attr("data-id");
+let eval_sum = () => {
+	let somme = 0;
+	for(let td of $(".sommes")){
+		somme+= parseFloat(td.innerText);
+	}
+	$("#prix_total").text(somme);
+};
+$('.quantite').on('input', function(event) {
+	event.stopPropagation();
+	let td_prix = $(this).parent().siblings('.prix');
+	let td_somme = $(this).parent().siblings('.sommes');
+	let quantite = parseFloat($(this).val());
+	if(isNaN(quantite) || quantite < 0){
+		quantite = 0;
+		$(this).val(0);
+	}
+	td_somme.text(parseFloat(td_prix.text())*quantite);
+	$(this).val(parseFloat(quantite));
+	eval_sum();
+});
+
+$("#commander").on('click', function(){
+	let datas = [];
+	var errors = 0;
+	let id_commande = $("#commande").attr('data-id');	
+	function updatePanier(){
+		for(let tr of $('.requisition-item')){
+			let $tr = $(tr);
+			let id = $tr.attr("data-id");
+			let quantite = $tr.find(".quantite").first().val();
+			data = {id:id, quantite:quantite};
+			// datas.push(data);
+			$.ajax({
+				type:'PATCH',
+				headers: { "X-CSRFToken": $.cookie("csrftoken") },
+				url:'/api/panier/'+id+'/',
+				data:data,
+			}).fail(function(){
+				errors++;
+			});
+		}
+	}
+	$.when(updatePanier()).done(function () {
+		if(errors==0){
+			let tel = parseInt(prompt("si vous voulez beneficier d'autres valeurs ajoutées", ""));
+			if(isNaN(tel) || tel < 0){
+				tel = 0;
+			}
+			data = {commandee:true, tel:tel};
+			$.ajax({
+				type:'PUT',
+				headers: { "X-CSRFToken": $.cookie("csrftoken") },
+				url:'/api/commande/'+id_commande+'/',
+				data:data,
+				success:function(){
+					$("#commande").remove();
+					$("#n_requisitions").text(0);
+					$.ajax({
+						url: '/api/deep_panier/commande/'+id_commande+'/',
+						type: 'GET',
+					})
+					.done(function(data) {
+						$('#accordion').append(
+							accordionTemplate(
+								id_commande,
+								$('.commands_cards').length+1,
+								data
+							)
+						);
+					})
+					
+				},
+				error:function(){
+					// location.reload()
+				}
+			});
+		}
+	});
+});
+
+});
+</script>
+{% endblock main %}
