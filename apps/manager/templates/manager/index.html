@@ -29,7 +29,7 @@
 				<h2>courbe depenses</h2>
 			</div>
 			<div class="card-body mt-0 pt-0">
-				<canvas id="chartService" class="bg-light col-12"></canvas>
+				<canvas id="chartES" class="bg-light col-12"></canvas>
 			</div>
 		</div>
 	</div>
@@ -39,7 +39,7 @@
 				<h2>bar depenses</h2>
 			</div>
 			<div class="card-body mt-0 pt-0">
-				<canvas id="barsService" class="bg-light col-12"></canvas>
+				<canvas id="barsES" class="bg-light col-12"></canvas>
 			</div>
 		</div>
 	</div>
@@ -47,9 +47,13 @@
 		<div class="card">
 			<div class="card-body">
 				<h2>bar votes</h2>
+				<label for="recettes">chisissez la recette:</label>
+				<select id="recettes" class="form-control">
+				  <option value=" ">(aucune choix)</option>
+				</select>
 			</div>
 			<div class="card-body mt-0 pt-0">
-				<canvas id="barsService" class="bg-light col-12"></canvas>
+				<canvas id="doughnutFeed" class="bg-light col-12"></canvas>
 			</div>
 		</div>
 	</div>
@@ -59,32 +63,67 @@
 				<h2>bar recette modale</h2>
 			</div>
 			<div class="card-body mt-0 pt-0">
-				<canvas id="barsService" class="bg-light col-12"></canvas>
+				<canvas id="pieMode" class="bg-light col-12"></canvas>
 			</div>
 		</div>
 	</div>
 </div>
 <script type="text/javascript">
 // let $chartCuisine = $('#chartCuisine').getContext('2d');
-let $chartService = document.getElementById('chartService').getContext('2d');
-let $barsService = document.getElementById('barsService').getContext('2d');
+let $chartService = $('#chartService')[0].getContext('2d');
+let $barsService = $('#barsService')[0].getContext('2d');
+let $chartES = $('#chartES')[0].getContext('2d');
+let $barsES = $('#barsES')[0].getContext('2d');
+let $doughnutFeed = $('#doughnutFeed')[0].getContext('2d');
+let $pieMode = $('#pieMode')[0].getContext('2d');
 
 let chartService = new Chart($chartService, {
 	type:'line',
 	data:{
 		labels:[],
-		datasets:[]
+		datasets:[],
+	}
+})
+let chartES = new Chart($chartES, {
+	type:'line',
+	data:{
 	}
 })
 let barsService = new Chart($barsService, {
 	type:'bar',
 	data:{
 		labels:[],
-		datasets:[]
+		datasets:[{}],
 	}
 })
-let randomColorGenerator = function () { 
-    return '#' + (Math.random().toString(16) + '0000000').slice(2, 8); 
+let barsES = new Chart($barsES, {
+	type:'bar',
+	data:{
+		labels:[],
+		datasets:[{}],
+	}
+})
+let doughnutFeed = new Chart($doughnutFeed, {
+	type:'horizontalBar',
+	data:{
+		labels:[],
+		datasets:[{}],
+	}
+})
+let pieMode = new Chart($pieMode, {
+	type:'pie',
+	data:{
+		labels:[],
+		datasets:[{}],
+	}
+})
+let randomColor = function () { 
+	var num = Math.round(0xffffff * Math.random());
+	var r = num >> 16;
+	var g = num >> 8 & 255;
+	var b = num & 255;
+	return ['rgba(' + r + ', ' + g + ', ' + b + ', ' + 0.2 + ')',
+			'rgba(' + r + ', ' + g + ', ' + b + ', ' + 1 + ')'];
 };
 // charts Services
 $.ajax({
@@ -101,13 +140,29 @@ $.ajax({
 		dataType: 'json',
 	})
 	.done(function(data) {
-		color = randomColorGenerator();
 		for(let el of data){
-			el.borderColor=randomColorGenerator();
+			el.borderColor=randomColor()[1];
 		};
 		chartService.data.datasets = data;
 		chartService.update();
 	});
+});
+//=====================================================
+// charts Entree/Sortie
+$.ajax({
+	url: "/api/chart_es/esdefault/",
+	type: 'GET',
+	dataType: 'json',
+})
+.done(function(data) {
+	let labels = data;
+	for(let el of data.datasets){
+		c = randomColor();
+		el.borderColor=c[1];
+		el.backgroundColor=c[0];
+	}
+	chartES.data = data;
+	chartES.update();
 });
 //=====================================================
 // bar services
@@ -117,17 +172,98 @@ $.ajax({
 	dataType: 'json',
 })
 .done(function(data) {
-	let dict = {'data':data.data, backgroundColor:[]}
-	dict.label = 'nombre servi';
 	barsService.data.labels = data.labels;
+	bg = [];
+	strokes = [];
 	for(let el of data.data){
-		dict.backgroundColor.push(randomColorGenerator());
+		c = randomColor();
+		bg.push(c[0]);
+		strokes.push(c[1]);
 	}
-	barsService.data.datasets = [dict];
-
-	console.log(barsService.data);
+	barsService.data.datasets[0].label = 'nombre servi';
+	barsService.data.datasets[0].data = data.data;
+	barsService.data.datasets[0].backgroundColor = bg;
+	barsService.data.datasets[0].borderColor = strokes;
 	barsService.update();
 });
+//=====================================================
+// bar Entrée/Sortie
+$.ajax({
+	url: '/api/chart_es/esbardefault/',
+	type: 'GET',
+	dataType: 'json',
+})
+.done(function(data) {
+	barsES.data.labels = data.labels;
+	bg = []
+	strokes = []
+	for(let el of data.datasets[0].data){
+		c = randomColor();
+		bg.push(c[0]);
+		strokes.push(c[1]);
+	}
+	data.datasets[0].backgroundColor = bg;
+	data.datasets[0].borderColor = strokes;
+	barsES.data.datasets = data.datasets;
+	barsES.data.datasets[0].label = 'les Entrées & sorties';
+	barsES.update();
+});
+//=====================================================
+// pie Mode
+$.ajax({
+	url: '/api/chart_mode/modedefault/',
+	type: 'GET',
+	dataType: 'json',
+})
+.done(function(data) {
+	pieMode.data.labels = data.labels;
+	bg = []
+	strokes = []
+	for(let el of data.datasets[0].data){
+		c = randomColor();
+		bg.push(c[0]);
+		strokes.push(c[1]);
+	}
+	data.datasets[0].backgroundColor = bg;
+	data.datasets[0].borderColor = strokes;
+	pieMode.data.datasets = data.datasets;
+	pieMode.data.datasets[0].label = 'les le recettes modales';
+	pieMode.update();
+});
+//=====================================================
+$.ajax({
+	url: '/api/recette/',
+	type: 'GET',
+	dataType: 'json',
+})
+.done(function(data) {
+	for (let recette of data) {
+		$("#recettes").append(new Option(recette.nom, recette.id));
+	}
+});
+$("#recettes").on('change', function(event) {
+	$.ajax({
+		url: '/api/chart_feed/'+$(this).val()+'/feedback/',
+		type: 'GET',
+		dataType: 'json',
+	})
+	.done(function(data) {
+		doughnutFeed.data.labels = data.labels;
+		bg = []
+		strokes = []
+		for(let el of data.datasets[0].data){
+			c = randomColor();
+			bg.push(c[0]);
+			strokes.push(c[1]);
 
+		}
+		data.datasets[0].backgroundColor = bg;
+		data.datasets[0].borderColor = strokes;
+		doughnutFeed.data.datasets = data.datasets;
+		doughnutFeed.data.datasets[0].label = 'les votes';
+		doughnutFeed.update();
+	})
+	
+});
 </script>
 {% endblock main %}

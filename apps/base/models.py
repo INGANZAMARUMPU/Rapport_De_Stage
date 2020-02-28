@@ -207,15 +207,15 @@ class Paiement(models.Model):
 		commande.save()
 
 class FeedBack(models.Model):
-	client = models.ForeignKey(User, null=True, on_delete=models.SET_NULL)
-	recette = models.ForeignKey("Recette", null=True, on_delete=models.SET_NULL)
+	recette = models.ForeignKey("Recette", on_delete=models.CASCADE)
+	commande = models.ForeignKey("Commande", null=True, on_delete=models.SET_NULL)
 	stars = models.IntegerField()
-	commentaire = models.TextField()
+	commentaire = models.TextField(blank=True)
 	visible = models.BooleanField(default=True)
 	date = models.DateField(blank=True, default=timezone.now)
 
 	class Meta:
-		unique_together = ('client', 'recette')
+		unique_together = ('commande', 'recette')
 
 def delZeroQuantity(sender, instance, *args, **kwargs):
 	self = instance

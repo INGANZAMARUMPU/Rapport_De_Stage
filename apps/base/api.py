@@ -109,6 +109,138 @@ class ChartEnteeSortie(viewsets.ViewSet):
 	authentication_classes = [SessionAuthentication]
 	permission_classes = [IsAuthenticated]
 
+	@action(methods=['GET'], detail=False, url_name="chart_es",
+		url_path=r'esdu(?P<debut>(\d{1,4}[-]?){3})au(?P<fin>(\d{1,4}[-]?){3})', )
+	def esdetail(self, request, debut, fin):
+		fin = datetime.strptime(fin, "%Y-%m-%d")
+		debut = datetime.strptime(debut, "%Y-%m-%d")
+		delta = fin - debut
+		entree, sortie, labels= [], [], []
+		for i in range(delta.days+1):
+			date = debut + timedelta(days=i)
+			labels.append(date.strftime("%Y-%m-%d"))
+			service = Commande.objects.filter(
+				payee__gt=0, date= date).aggregate(Sum('payee'))
+			stock = Stock.objects.filter(quantite__gt=0, date=date).annotate(
+			montant=F('quantite')*F('offre__prix')).aggregate(Sum("montant"))
+			if service["payee__sum"]:
+				entree.append(service["payee__sum"])
+			else:
+				entree.append(0)
+			if stock["montant__sum"]:
+				sortie.append(stock["montant__sum"])
+			else:
+				sortie.append(0)
+		return Response({
+			'labels':labels,
+			"datasets":[
+				{'label':"entree", 'data':entree},
+				{'label':"sortie", 'data':sortie}
+			]})
+
+	@action(methods=['GET'], detail=False, url_name="bar_es",
+		url_path=r'esbardu(?P<debut>(\d{1,4}[-]?){3})au(?P<fin>(\d{1,4}[-]?){3})', )
+	def esbar(self, request, debut, fin):
+		fin = datetime.strptime(fin, "%Y-%m-%d")
+		debut = datetime.strptime(debut, "%Y-%m-%d")
+		labels = ['entree', 'sortie', 'perte']
+		data= []
+		service = Commande.objects\
+			.filter(payee__gt=0, date__gte=debut, date__lte=fin)\
+			.aggregate(entree=Sum('payee'))
+		
+		stock = Stock.objects\
+			.filter(quantite__gt=0, date__gte=debut, date__lte=fin)\
+			.annotate(montant=F('quantite')*F('offre__prix'))\
+			.aggregate(sortie=Sum("montant"))
+
+		data.append(service['entree'])
+		data.append(stock['sortie'])
+		data.append(0)
+		return Response({
+			'labels':labels,
+			"datasets":[
+				{'data':data},
+			]})
+
+	@action(methods=['GET'], detail=False, url_name="chart_es_default",
+		url_path=r'esdefault', )
+	def esdefault(self, request):
+		fin = datetime.today()
+		debut = fin - timedelta(days=20)
+		fin = fin.strftime("%Y-%m-%d")
+		debut = debut.strftime("%Y-%m-%d")
+		return self.esdetail(request, debut, fin)
+
+	@action(methods=['GET'], detail=False, url_name="bar_es_default",
+		url_path=r'esbardefault', )
+	def esbardefault(self, request):
+		fin = datetime.today()
+		debut = fin - timedelta(days=20)
+		fin = fin.strftime("%Y-%m-%d")
+		debut = debut.strftime("%Y-%m-%d")
+		return self.esbar(request, debut, fin)
+
+class ChartMode(viewsets.ViewSet):
+	authentication_classes = [SessionAuthentication]
+	permission_classes = [IsAuthenticated]
+
+	@action(methods=['GET'], detail=False, url_name="chart_mode",
+		url_path=r'modedu(?P<debut>(\d{1,4}[-]?){3})au(?P<fin>(\d{1,4}[-]?){3})', )
+	def modedetail(self, request, debut, fin):
+		fin = datetime.strptime(fin, "%Y-%m-%d")
+		debut = datetime.strptime(debut, "%Y-%m-%d")
+		data = []
+		mode = Panier.objects\
+			.filter(commande__date__lte=fin, commande__date__gte=debut)\
+			.values('recette__nom').annotate(times=Count('recette__nom'))
+
+		return Response({
+			'labels': [panier['recette__nom'] for panier in mode],
+			"datasets":[
+				{'data':[panier['times'] for panier in mode]},
+			]})
+
+	@action(methods=['GET'], detail=False, url_name="mode_default",
+		url_path=r'', )
+	def modedefault(self, request):
+		fin = datetime.today()
+		debut = fin - timedelta(days=20)
+		fin = fin.strftime("%Y-%m-%d")
+		debut = debut.strftime("%Y-%m-%d")
+		return self.modedetail(request, debut, fin)
+
+class ChartFeedBack(viewsets.ViewSet):
+	authentication_classes = [SessionAuthentication]
+	permission_classes = [IsAuthenticated]
+
+	@action(methods=['GET'], detail=True, url_name="chart_feed",
+		url_path=r'feeddu(?P<debut>(\d{1,4}[-]?){3})au(?P<fin>(\d{1,4}[-]?){3})', )
+	def feeddetail(self, request, pk, debut, fin):
+		fin = datetime.strptime(fin, "%Y-%m-%d")
+		debut = datetime.strptime(debut, "%Y-%m-%d")
+		data = []
+		for i in range(1, 6):
+			feedback = FeedBack.objects\
+			.filter(date__lte=fin, date__gte=debut, recette=pk)\
+			.filter(stars=i).aggregate(note=Count('stars'))
+			data.append(feedback['note'])
+
+		return Response({
+			'labels': [1, 2, 3, 4, 5],
+			"datasets":[
+				{'label':"stars", 'data':data},
+			]})
+
+	@action(methods=['GET'], detail=True, url_name="feed_default",
+		url_path=r'feedback', )
+	def feeddefault(self, request, pk):
+		fin = datetime.today()
+		debut = fin - timedelta(days=20)
+		fin = fin.strftime("%Y-%m-%d")
+		debut = debut.strftime("%Y-%m-%d")
+		return self.feeddetail(request, pk, debut, fin)
+
 class ProduitViewset(viewsets.ModelViewSet):
 	authentication_classes = [SessionAuthentication]
 	permission_classes = [IsAuthenticated]

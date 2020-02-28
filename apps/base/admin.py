@@ -86,10 +86,10 @@ class PlaceAdmin(admin.ModelAdmin):
 	ordering = ("nom",)
 
 class FeedBackAdmin(admin.ModelAdmin):
-	list_display = ("client", "recette", "stars", "commentaire", "visible", "date")
-	list_filter = ("client", "recette", "stars", "commentaire", "visible", "date")
-	search_field = ("client", "recette", "stars", "commentaire", "visible", "date")
-	ordering = ("client", "recette", "stars", "commentaire", "visible", "date")
+	list_display = ("commande", "recette", "stars", "commentaire", "visible", "date")
+	list_filter = ("commande", "recette", "stars", "commentaire", "visible", "date")
+	search_field = ("commande", "recette", "stars", "commentaire", "visible", "date")
+	ordering = ("commande", "recette", "stars", "commentaire", "visible", "date")
 
 
 admin.site.register(Produit, ProduitAdmin)
