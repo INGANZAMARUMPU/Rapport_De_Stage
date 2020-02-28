@@ -19,10 +19,6 @@ class ChartServiceViewset(viewsets.ViewSet):
 	authentication_classes = [SessionAuthentication]
 	permission_classes = [IsAuthenticated]
 
-	@action(methods=['GET'], detail=False, url_path=r'cuisine', url_name="chart_cuisine")
-	def cuisine(self, request):
-		return Response({'chart':"cuisine"})
-
 	@action(methods=['GET'], detail=False, url_name="chart_service",
 		url_path=r'servicedu(?P<debut>(\d{1,4}[-]?){3})au(?P<fin>(\d{1,4}[-]?){3})', )
 	def servicedetail(self, request, debut, fin):
@@ -32,11 +28,14 @@ class ChartServiceViewset(viewsets.ViewSet):
 		fin = datetime.strptime(fin, "%Y-%m-%d")
 		debut = datetime.strptime(debut, "%Y-%m-%d")
 		delta = fin - debut
-		data= []
+		data, labels, datasets = {}, [], []
+		for a in range(delta.days+1):
+			date = debut + timedelta(days=a)
+			labels.append(date.strftime("%Y-%m-%d"))
+		data['labels'] = labels
 		for serveur in serveurs:
 			services = []
-			for i in range(delta.days+1):
-				date = debut + timedelta(days=i)
+			for date in labels:
 				service = Commande.objects.filter(
 					serveur=serveur, date= date).values('serveur', 'date')\
 					.annotate(Count('pk'))
@@ -44,39 +43,18 @@ class ChartServiceViewset(viewsets.ViewSet):
 					services.append(service[0]["pk__count"])
 				else:
 					services.append(0)
-
-			data.append({'label':serveur.username, 'data':services})
+			datasets.append({'label':serveur.username, 'data':services})
+		
+		data['datasets'] = datasets
 		return Response(data)
 
 	@action(methods=['GET'], detail=False, url_path=r'service', url_name="chart_service_detail")
 	def service(self, request):
 		fin = datetime.today()
-		debut = fin - timedelta(days=20)
+		debut = fin - timedelta(days=7)
 		fin = fin.strftime("%Y-%m-%d")
 		debut = debut.strftime("%Y-%m-%d")
 		return self.servicedetail(request, debut, fin)
-
-	@action(methods=['GET'], detail=False, url_path=r'service_labels', url_name="chart_service_labels")
-	def servicel(self, request):
-		data = []
-		fin = datetime.today()
-		debut = fin - timedelta(days=20)
-		for a in range(1,8):
-			date = debut + timedelta(days=a)
-			data.append(date.strftime("%Y-%m-%d"))
-		return Response(data)
-
-	@action(methods=['GET'], detail=False, url_name="chart_service_labels",
-		url_path=r'servicelabelsdu(?P<debut>(\d{1,4}[-]?){3})au(?P<fin>(\d{1,4}[-]?){3})', )
-	def servicedetaill(self, request, debut, fin):
-		fin = datetime.strptime(fin, "%Y-%m-%d")
-		debut = datetime.strptime(debut, "%Y-%m-%d")
-		delta = fin - debut
-		data= []
-		for a in range(delta.days+1):
-			date = debut + timedelta(days=a)
-			data.append(date.strftime("%Y-%m-%d"))
-		return Response(data)
 
 	@action(methods=['GET'], detail=False, url_name="groupe_service",
 		url_path=r'servicegroupesdu(?P<debut>(\d{1,4}[-]?){3})au(?P<fin>(\d{1,4}[-]?){3})', )

@@ -1,12 +1,19 @@
 {% extends "manager/base.html" %}
+{% load static %}
 {% block main %}
-
+<link href="{% static "css/bootstrap-datepicker.standalone.min.css" %}" rel="stylesheet" crossorigin="anonymous" />
+<script src="{% static "js/bootstrap-datepicker.min.js" %}" crossorigin="anonymous"></script>
 
 <div class="row m-2">
 	<div class="col-6 mt-2">
 		<div class="card">
 			<div class="card-body">
 				<h2>courbe service</h2>
+				<div class="row ml-2">
+					<input class="datepicker form-control-sm col-4" id="d_chart_service" placeholder="date de debut" data-date-format="yyyy-mm-dd">
+					<input class="datepicker form-control-sm col-4" id="f_chart_service" placeholder="date de fin" data-date-format="yyyy-mm-dd">
+					<button class="btn btn-primary form-control-sm" id="btn-service">valider</button>
+				</div>
 			</div>
 			<div class="card-body mt-0 pt-0">
 				<canvas id="chartService" class="bg-light col-12"></canvas>
@@ -69,13 +76,17 @@
 	</div>
 </div>
 <script type="text/javascript">
+
+$(function () {
+	$('.datepicker').datepicker();
+});
 // let $chartCuisine = $('#chartCuisine').getContext('2d');
-let $chartService = $('#chartService')[0].getContext('2d');
-let $barsService = $('#barsService')[0].getContext('2d');
-let $chartES = $('#chartES')[0].getContext('2d');
-let $barsES = $('#barsES')[0].getContext('2d');
-let $doughnutFeed = $('#doughnutFeed')[0].getContext('2d');
-let $pieMode = $('#pieMode')[0].getContext('2d');
+let $chartService = $('#chartService');
+let $barsService = $('#barsService');
+let $chartES = $('#chartES');
+let $barsES = $('#barsES');
+let $doughnutFeed = $('#doughnutFeed');
+let $pieMode = $('#pieMode');
 
 let chartService = new Chart($chartService, {
 	type:'line',
@@ -126,26 +137,28 @@ let randomColor = function () {
 			'rgba(' + r + ', ' + g + ', ' + b + ', ' + 1 + ')'];
 };
 // charts Services
-$.ajax({
-	url: "/api/chartservice/service_labels/",
-	type: 'GET',
-	dataType: 'json',
-})
-.done(function(data) {
-	let labels = data;
-	chartService.data.labels = labels;
+function fChartService(url = '/api/chartservice/service/'){
 	$.ajax({
-		url: '/api/chartservice/service/',
+		url: url,
 		type: 'GET',
 		dataType: 'json',
 	})
 	.done(function(data) {
-		for(let el of data){
+		chartService.data.labels = data.labels;
+		for(let el of data.datasets){
 			el.borderColor=randomColor()[1];
+			el.borderWidth = 1;
 		};
-		chartService.data.datasets = data;
+		chartService.data.datasets = data.datasets;
 		chartService.update();
 	});
+}
+fChartService();
+$('#btn-service').on('click', function(event) {
+	url = "/api/chartservice/servicedu"+
+			$("#d_chart_service").val()+"au"
+			+$("#f_chart_service").val()+"/";
+	fChartService(url);
 });
 //=====================================================
 // charts Entree/Sortie
@@ -159,6 +172,7 @@ $.ajax({
 	for(let el of data.datasets){
 		c = randomColor();
 		el.borderColor=c[1];
+		el.borderWidth = 1;
 		el.backgroundColor=c[0];
 	}
 	chartES.data = data;
@@ -184,6 +198,7 @@ $.ajax({
 	barsService.data.datasets[0].data = data.data;
 	barsService.data.datasets[0].backgroundColor = bg;
 	barsService.data.datasets[0].borderColor = strokes;
+	barsService.data.datasets[0].borderWidth = 1;
 	barsService.update();
 });
 //=====================================================
@@ -204,6 +219,7 @@ $.ajax({
 	}
 	data.datasets[0].backgroundColor = bg;
 	data.datasets[0].borderColor = strokes;
+	data.datasets[0].borderWidth = 1;
 	barsES.data.datasets = data.datasets;
 	barsES.data.datasets[0].label = 'les Entrées & sorties';
 	barsES.update();
@@ -226,6 +242,7 @@ $.ajax({
 	}
 	data.datasets[0].backgroundColor = bg;
 	data.datasets[0].borderColor = strokes;
+	data.datasets[0].borderWidth = 1;
 	pieMode.data.datasets = data.datasets;
 	pieMode.data.datasets[0].label = 'les le recettes modales';
 	pieMode.update();
@@ -259,6 +276,7 @@ $("#recettes").on('change', function(event) {
 		}
 		data.datasets[0].backgroundColor = bg;
 		data.datasets[0].borderColor = strokes;
+		data.datasets[0].borderWidth = 1;
 		doughnutFeed.data.datasets = data.datasets;
 		doughnutFeed.data.datasets[0].label = 'les votes';
 		doughnutFeed.update();
