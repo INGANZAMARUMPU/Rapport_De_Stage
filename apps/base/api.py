@@ -232,15 +232,15 @@ class StockViewset(viewsets.ModelViewSet):
 	serializer_class = StockSerializer
 
 	@action(methods=['GET'], detail=False,
-		url_path=r'quantite/(?P<stock_id>[0-9]+)',
+		url_path=r'quantite/(?P<produit_id>[0-9]+)',
 		url_name="quantite_total")
-	def quantiteTotal(self, request, stock_id):
+	def quantiteTotal(self, request, produit_id):
 		# stocks = Stock.objects.filter(produit=self,
 		# 	quantite__gt=0, 
 		# 	expiration_date__gt=datetime.now())
 		# quantite = stocks.aggregate(Sum('quantite'))['quantite__sum']
-		stock = Stock.objects.get(id=stock_id)
-		return Response({'quantite':stock.produit.quantiteEnStock()})
+		produit = Produit.objects.get(id=produit_id)
+		return Response({'quantite':produit.quantiteEnStock()})
 
 	@action(methods=["GET"],
 		url_path=r"requisition/(?P<stock_id>[0-9]+)",

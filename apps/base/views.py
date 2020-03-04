@@ -41,15 +41,12 @@ def index(request):
 	user_groups = request.user.groups.all()
 	if user_groups:
 		for group in user_groups:
-			if group.name == "admin":
-				return redirect('manager')
-			if group.name == "table":
-				return redirect('table')
-			if group.name == "service":
-				return redirect('service')
-			if group.name == "cuisine":
-				return redirect('cuisine')
-			if group.name == "commercial":
-				return redirect('commercial')
+			return rediriger(request, group.name)
 	messages.error(request, 'vous avez aucune permission')
 	return redirect(disconnect)
+
+@login_required
+def rediriger(request, name):
+	if name == "admin":
+		return redirect('manager')
+	return redirect(name)

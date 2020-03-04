@@ -1,20 +1,16 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.db.models import Sum
 from django.contrib import messages
 
 from apps.base.models import *
 from apps.base.forms import *
 
-def loadPlaces(place_id=None):
-	places = Place.objects.all()
-	if place_id:
-		tables = Table.objects.filter(place=place_id)
-		return places, tables
-	return places, []
-
-
 def commercial(request, place_id=None):
-	places, tables = loadPlaces(place_id)
+	places = Place.objects.all()
+	if not place_id and places:
+		return redirect ('commercial', place_id=places[0].id)
+	else:
+		tables = Table.objects.filter(place=place_id)
 	return render(request, 'commercial/index.html', locals())
 	
 def payer(request, table_id):
@@ -24,7 +20,7 @@ def payer(request, table_id):
 	return render(request, 'commercial/payement.html', locals())
 	
 def stock(request):
-	places, tables = loadPlaces()
+	places = Place.objects.all()
 	products = Produit.objects.all()
 	return render(request, 'commercial/stock.html', locals())
 	

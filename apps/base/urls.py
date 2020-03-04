@@ -25,4 +25,5 @@ urlpatterns = [
     path("login/", views.connect, name="login"),
     path("logout/", views.disconnect, name="logout"),
     path("", views.index, name="index"),
+    path("rediriger/<name>", views.rediriger, name="rediriger"),
 ]

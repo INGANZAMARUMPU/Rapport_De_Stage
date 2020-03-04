@@ -48,6 +48,9 @@
                 <div class="dropdown-menu dropdown-menu-right" aria-labelledby="userDropdown">
                     <a class="dropdown-item" href="#">Settings</a>
                     <div class="dropdown-divider"></div>
+                    {% for group in user.groups.all %}   
+                    <a class="dropdown-item" href="{% url 'rediriger' group.name %}">{{ group }}</a>
+                    {% endfor %}
                     <a class="dropdown-item" href="/logout/">Logout</a>
                 </div>
             </li>

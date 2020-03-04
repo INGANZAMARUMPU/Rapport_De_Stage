@@ -118,14 +118,14 @@ $('.modal-link').on('click',function(event){
     	.done(function(data) {
     		console.log($(this));
     		$lbl_stock.text(data.quantite);
-	        if(product.quantite == 0){
-	            modal-link.addClass('text-danger');
+	        if(data.quantite == 0){
+	            modal_link.addClass('text-danger');
 	        }
 	        else if( data.quantite < 5){
-	            modal-link.addClass('text-success');
+	            modal_link.addClass('text-success');
 	        }
 	        else{
-	        	modal-link.addClass('text-primary');
+	        	modal_link.addClass('text-primary');
 	        }
     	})
     	.fail(function() {

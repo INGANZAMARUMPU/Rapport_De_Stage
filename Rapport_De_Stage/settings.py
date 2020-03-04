@@ -44,7 +44,8 @@ INSTALLED_APPS = [
     'apps.service',
     'apps.cuisine',
     'rest_framework',
-    'mathfilters'
+    'mathfilters',
+    'django_extensions',
 ]
 
 MIDDLEWARE = [

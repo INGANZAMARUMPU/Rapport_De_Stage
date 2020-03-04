@@ -13,6 +13,7 @@ def service(request, place_id=None, ordered=None):
 	return render(request, 'service/index.html', locals())
 
 @login_required
-def tables(request):
-	return render(request, '404.html', locals())
+def commandes(request, table_id):
+	commandes = Commande.objects.filter(table=table_id, payee__lt=1)
+	return render(request, 'service/commandes.html', locals())
 	

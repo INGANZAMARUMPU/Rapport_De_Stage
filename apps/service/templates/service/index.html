@@ -10,6 +10,7 @@
 			style='	-moz-user-select: -moz-none;
 					-khtml-user-select: none;
 					-webkit-user-select: none;'>
+				<a href="{% url 'scommandes' table.id %}" class="text-decoration-none modal-link">
 				<div class="card-body m-auto col-12 p-0">
 					<ul class="list-group text-justify list-group-flush">
 						<li class="border-0 list-group-item p-0 text-center font-weight-bold">{{ table }}</li>
@@ -17,6 +18,7 @@
 						<li class="border-0 list-group-item p-0 text-center table-logs">no logs</li>
 					</ul>
 				</div>
+				</a>
 			</div>
 		</div>
 	{% endfor %}
@@ -33,6 +35,7 @@
 				-khtml-user-select: none;
 				-webkit-user-select: none;
 				cursor: grab;'>
+		<a href="{% url 'scommandes' table.id %}" class="text-decoration-none modal-link">
 		<div class="card-body m-auto col-12 p-1">
 			<ul class="list-group text-justify list-group-flush">
 				<li class="border-0 list-group-item p-0 text-center font-weight-bold">{{ table }}</li>
@@ -40,6 +43,7 @@
 				<li class="border-0 list-group-item p-0 text-center table-logs">no logs</li>
 			</ul>
 		</div>
+		</a>
 	</div>
 	{% endfor %}
 	</div>
@@ -50,8 +54,27 @@
 		</label>
 		<div id="log">no logs</div>
 	</div>
+{% endif %}
+<div class="modal fade " id="myModal" role="dialog">
+    <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Modern Restaurant paying form</h4>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body">
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
 <script type="text/javascript">
-	jQuery(document).ready(function($) {
+jQuery(document).ready(function($) {
+//==================== drag code ======================
 	let $dragging = null;
 	let draggable = null;
 	let local_x = null;
@@ -60,6 +83,7 @@
 	let global_y = null;
 	$(".client-table").on("mousedown touchstart", function (event) {
 		if( $('#edit_mode').is(':checked') ){
+	    	event.preventDefault();
 			$dragging = true;
 			$(".client-table").css("z-index", 0);
 			$draggable = $(this);
@@ -72,6 +96,7 @@
 
 	$(".client-table").parent().on("mouseup touchend", function (e) {
 	    if ($dragging & $('#edit_mode').is(':checked')) {
+	    	event.preventDefault();
 		    $dragging = null;
 		    let data={
 		    	x: $draggable.position().left,
@@ -85,13 +110,11 @@
 		        	data: data,
 		        })
 		        .done(function() {
-		        	$("#log").text("change element position success");
+		        	$("#log").text("change table position success");
+
 		        })
 		        .fail(function() {
 		        	$("#log").text("change element position error");
-		        })
-		        .always(function() {
-		        	// $("#log").html($("#log").text()+"<br>complete!");
 		        });
 	    }
 
@@ -99,6 +122,7 @@
 
 	$(".client-table").parent().on("mousemove touchmove", function (event) {
 	    if ($dragging & $('#edit_mode').is(':checked')) {
+	    	event.preventDefault();
 	    	let offset = $(this).offset();
 	    	let max_w = $(this).width()-$draggable.width();
 	    	let max_h = $(this).height()-$draggable.height();
@@ -111,11 +135,7 @@
 			}
 	    }
 	});
-	});
-</script>
-{% endif %}
-<script type="text/javascript">
-jQuery(document).ready(function($) {
+// ==================== fin code drag'n'drop ====================
 	for(let table of $(".client-table")){
 		let table_id = $(table).attr('data-id');
 		$.ajax({
@@ -129,12 +149,6 @@ jQuery(document).ready(function($) {
 				$(table).addClass('bg-success');
 				$(table).find('li').addClass('bg-success text-light');
 			}
-		})
-		.fail(function() {
-			console.log("error");
-		})
-		.always(function() {
-			console.log("complete");
 		});
 	}
 	for(let place of $(".place")){
@@ -150,14 +164,19 @@ jQuery(document).ready(function($) {
 			// 	$(place).addClass('bg-success');
 			// 	$(place).find('li').addClass('bg-success text-light');
 			// }
-		})
-		.fail(function() {
-			console.log("error");
-		})
-		.always(function() {
-			console.log("complete");
 		});
 	}
+
+	$('.modal-link').on('click',function(event){
+	    event.preventDefault();
+	    event.stopPropagation();
+	    if (!$('#edit_mode').is(':checked')){
+		    $('.modal-body').load($(this).attr('href'),function(){
+		    	$('#myModal').modal('handleUpdate')
+		        $('#myModal').modal({show:true});
+		    });
+		}
+	}); 
 });	
 </script>
 {% endblock main %}				

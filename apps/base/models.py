@@ -62,7 +62,7 @@ class Stock(models.Model):
 	offre = models.ForeignKey("Offre", blank=True, null=True, on_delete=models.SET_NULL)
 	quantite = models.FloatField()
 	date = models.DateField(blank=True, default=timezone.now)
-	expiration = models.IntegerField(null=True, verbose_name="délais de validité(en jours)")
+	expiration = models.PositiveIntegerField(null=True, verbose_name="délais de validité(en jours)")
 	expiration_date = models.DateField(editable=False, null=True)
 	personnel = models.ForeignKey("Personnel", default=1, on_delete=models.SET_DEFAULT)
 	is_valid = models.BooleanField(default=True)
@@ -143,8 +143,8 @@ class Vitamine(models.Model):
 class Recette(models.Model):
 	nom = models.CharField(max_length=64)
 	ingredient = models.ManyToManyField("Ingredient")
-	temp = models.IntegerField(verbose_name='temp de cuisson(en minutes)')
-	prix = models.IntegerField()
+	temp = models.PositiveIntegerField(verbose_name='temp de cuisson(en minutes)')
+	prix = models.PositiveIntegerField()
 	image = models.ImageField(upload_to="recettes/")
 	categorie = models.ForeignKey("Categorie", null=True, on_delete=models.SET_NULL)
 	disponible = models.BooleanField(default=True)
@@ -160,8 +160,8 @@ class Recette(models.Model):
 class Panier(models.Model):
 	commande = models.ForeignKey("Commande", null=True, on_delete=models.CASCADE, related_name='details')
 	recette = models.ForeignKey("Recette", null=True, on_delete=models.SET_NULL)
-	quantite = models.IntegerField(default=1)
-	somme = models.IntegerField(blank=True, verbose_name='à payer')
+	quantite = models.PositiveIntegerField(default=1)
+	somme = models.PositiveIntegerField(blank=True, verbose_name='à payer')
 	pret = models.BooleanField(default=False)
 
 	def save(self, *args, **kwargs):
@@ -195,7 +195,7 @@ class Commande(models.Model):
 
 class Paiement(models.Model):
 	commande = models.ForeignKey("Commande", null=True, on_delete=models.SET_NULL)
-	somme = models.IntegerField(verbose_name='somme payée', default=0)
+	somme = models.PositiveIntegerField(verbose_name='somme payée', default=0)
 	date = models.DateField(blank=True, default=timezone.now)
 
 	def save(self, *args, **kwargs):
@@ -209,7 +209,7 @@ class Paiement(models.Model):
 class FeedBack(models.Model):
 	recette = models.ForeignKey("Recette", on_delete=models.CASCADE)
 	commande = models.ForeignKey("Commande", null=True, on_delete=models.SET_NULL)
-	stars = models.IntegerField()
+	stars = models.PositiveIntegerField()
 	commentaire = models.TextField(blank=True)
 	visible = models.BooleanField(default=True)
 	date = models.DateField(blank=True, default=timezone.now)
