@@ -6,6 +6,7 @@
 	<div class="well well-sm">
         <div class="row" id="post-review-box">
             <div class="col-md-12">
+            	<h3 style="overflow: hidden; white-space: nowrap;text-overflow: ellipsis;">{{ panier }}</h3>
 			    <div class="row lead ml-1">
 			        <div class="stars" data-id={{ panier.id }}>
 						<span class="fa fa-star" data-id="1"></span>
@@ -14,7 +15,7 @@
 						<span class="fa fa-star" data-id="4"></span>
 						<span class="fa fa-star" data-id="5"></span>
 			        </div>
-			        <span class="star_count">0</span> star(s)
+			        <span class="star_count">&emsp;0</span> star(s)
 			    </div>
                 <form accept-charset="UTF-8" action="" method="post">
                     <textarea class="form-control animated" cols="50" name="comment" placeholder="Enter your review here..." rows="3">

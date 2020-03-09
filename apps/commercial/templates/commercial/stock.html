@@ -40,7 +40,7 @@
 		        href="{% url 'cdetails' product.id %}"
 		        target="blank">
 	        <div class="rounded m-0 bg-light">  
-	            <div class="text-center font-weight-bold">{{ product.nom }} {{ class.section }} </div>
+	            <div class="text-center font-weight-bold product-name">{{ product.nom }}</div>
 	            <div class="text-center"> 
 	            	<span class="quantite-stock">
 	                {{ product.quantiteEnStock|default:0 }}
@@ -104,9 +104,11 @@ $('.modal-link').on('click',function(event){
     let modal_link = $(this);
     let $lbl_stock = $(this).closest('.product').find('.quantite-stock');
     let data_id = $(this).closest('.product').attr('data-id');
+    let produit = $(this).closest('.product').find('.product-name').text();
     $('.modal-body').load($(this).attr('href'),function(){
-    	$('#myModal').modal('handleUpdate')
+    	$('#myModal').modal('handleUpdate');
         $('#myModal').modal({show:true});
+        $('#myModal').find('.modal-title').text("approvisionnement "+produit);
     });
     $('#myModal').on('hidden.bs.modal', function () {
     	console.log(data_id);

@@ -40,29 +40,29 @@
 			</tr>
 		</tfoot>
 	</table>
-	<div id="accordion">
-	{% for commande in commandes %}
-		<div class="card commands_cards">
-			<a data-toggle="collapse" class="text-decoration-none" data-parent="#accordion" 
-				href="#collapse{{ commande.id }}" aria-expanded="true" 
-				aria-controls="collapse{{ commande.id }}">
-				<div class="card-header" id="headingOne">
-					commande {{ forloop.counter }}
-				</div>
-			</a>
-			<div id="collapse{{ commande.id }}" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingOne">
-				<div class="card-body">
-					<ul>
-					{% for panier in commande.paniers %}
-						<li>{{ panier.quantite }} {{ panier.recette.nom }}</li>
-					{% endfor %}
-				</ul>
-				</div>
+{% endif %}
+<div id="accordion">
+{% for commande in commandes %}
+	<div class="card commands_cards">
+		<a data-toggle="collapse" class="text-decoration-none" data-parent="#accordion" 
+			href="#collapse{{ commande.id }}" aria-expanded="true" 
+			aria-controls="collapse{{ commande.id }}">
+			<div class="card-header" id="headingOne">
+				commande {{ forloop.counter }}
+			</div>
+		</a>
+		<div id="collapse{{ commande.id }}" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingOne">
+			<div class="card-body">
+				<ul>
+				{% for panier in commande.paniers %}
+					<li>{{ panier.quantite }} {{ panier.recette.nom }}</li>
+				{% endfor %}
+			</ul>
 			</div>
 		</div>
-	{% endfor %}
 	</div>
-{% endif %}
+{% endfor %}
+</div>
 <script type="text/javascript">
 function accordionTemplate(id, counter, data){
 	let li_items = ''

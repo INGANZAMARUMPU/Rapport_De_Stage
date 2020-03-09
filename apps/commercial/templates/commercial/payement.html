@@ -45,7 +45,7 @@
 <script type="text/javascript">
 jQuery(document).ready(function($) {
 $('#champ_somme').on('input', function() {
-    let $a_payer = $("#lbl_a_payer").text();
+    let $a_payer = parseFloat($("#lbl_a_payer").text());
     let $lbl_rendre = $('#a_rendre');
     let $payee = parseFloat($(this).val());
     $(this).val((isNaN($payee) || $payee < 0)? 0 : $payee)
