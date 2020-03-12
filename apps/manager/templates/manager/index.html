@@ -4,10 +4,10 @@
 <link href="{% static "css/bootstrap-datepicker.standalone.min.css" %}" rel="stylesheet" crossorigin="anonymous" />
 <script src="{% static "js/bootstrap-datepicker.min.js" %}" crossorigin="anonymous"></script>
 
-<div class="row m-2">
-	<div class="col-6 mt-2">
+<div class="row m-2 m-sm-0 p-sm-0">
+	<div class="col-md-6 mt-2">
 		<div class="card">
-			<div class="card-body">
+			<div class="card-body p-1">
 				<h2>courbe service</h2>
 				<div class="row ml-2">
 					<input class="datepicker form-control-sm col-4" id="d_chart_service" placeholder="date de debut" data-date-format="yyyy-mm-dd">
@@ -15,61 +15,61 @@
 					<button class="btn btn-primary form-control-sm" id="btn-service">valider</button>
 				</div>
 			</div>
-			<div class="card-body mt-0 pt-0">
+			<div class="card-body mt-0 p-0">
 				<canvas id="chartService" class="bg-light col-12"></canvas>
 			</div>
 		</div>
 	</div>
-	<div class="col-6 mt-2">
+	<div class="col-md-6 mt-2">
 		<div class="card">
-			<div class="card-body">
+			<div class="card-body p-1">
 				<h2>bar service</h2>
 			</div>
-			<div class="card-body mt-0 pt-0">
+			<div class="card-body mt-0 p-0">
 				<canvas id="barsService" class="bg-light col-12"></canvas>
 			</div>
 		</div>
 	</div>
-	<div class="col-6 mt-2">
+	<div class="col-md-6 mt-2">
 		<div class="card">
-			<div class="card-body">
+			<div class="card-body p-1">
 				<h2>courbe depenses</h2>
 			</div>
-			<div class="card-body mt-0 pt-0">
+			<div class="card-body mt-0 p-0">
 				<canvas id="chartES" class="bg-light col-12"></canvas>
 			</div>
 		</div>
 	</div>
-	<div class="col-6 mt-2">
+	<div class="col-md-6 mt-2">
 		<div class="card">
-			<div class="card-body">
+			<div class="card-body p-1">
 				<h2>bar depenses</h2>
 			</div>
-			<div class="card-body mt-0 pt-0">
+			<div class="card-body mt-0 p-0">
 				<canvas id="barsES" class="bg-light col-12"></canvas>
 			</div>
 		</div>
 	</div>
-	<div class="col-6 mt-2">
+	<div class="col-md-6 mt-2">
 		<div class="card">
-			<div class="card-body">
+			<div class="card-body p-1">
 				<h2>bar votes</h2>
 				<label for="recettes">chisissez la recette:</label>
 				<select id="recettes" class="form-control">
 				  <option value=" ">(aucune choix)</option>
 				</select>
 			</div>
-			<div class="card-body mt-0 pt-0">
+			<div class="card-body mt-0 p-0">
 				<canvas id="doughnutFeed" class="bg-light col-12"></canvas>
 			</div>
 		</div>
 	</div>
-	<div class="col-6 mt-2">
+	<div class="col-md-6 mt-2">
 		<div class="card">
-			<div class="card-body">
+			<div class="card-body p-1">
 				<h2>bar recette modale</h2>
 			</div>
-			<div class="card-body mt-0 pt-0">
+			<div class="card-body mt-0 p-0">
 				<canvas id="pieMode" class="bg-light col-12"></canvas>
 			</div>
 		</div>

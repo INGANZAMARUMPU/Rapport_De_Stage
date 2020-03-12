@@ -52,7 +52,10 @@ class Produit(models.Model):
 		stocks = Stock.objects.filter(produit=self,
 			is_valid=True)
 		quantite = stocks.aggregate(Sum('quantite'))['quantite__sum']
-		return quantite
+		try:
+			return int(quantite)
+		except:
+			return 0
 
 	class Meta:
 		ordering = ["nom"]

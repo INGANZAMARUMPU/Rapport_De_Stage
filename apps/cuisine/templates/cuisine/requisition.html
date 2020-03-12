@@ -24,8 +24,12 @@
             </div>
             {% endfor %}
             <script>
-              $('.link-formset').formset({addText: 'ajouter un autre produit',deleteText: 'enlever', addCssClass:''});
-              
+              $('.link-formset').formset(
+                {
+                  addText: 'ajouter un autre produit',
+                  deleteText: 'enlever',
+                  addCssClass:'btn-link'
+                });
             </script>
         </fieldset>
       <div class="col-xl-4 col-lg-6 col-12">

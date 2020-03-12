@@ -6,13 +6,12 @@ from rest_framework.response import Response
 from rest_framework import viewsets
 
 from django.shortcuts import render
-from django.db.models import F
 
 from .models import *
 from django.contrib.auth.models import Group
 from datetime import date, timedelta, datetime
 from .serializers import *
-from django.db.models import Count
+from django.db.models import F, Count
 
 # Create your views here.
 class ChartServiceViewset(viewsets.ViewSet):

@@ -15,16 +15,28 @@ class ProduitForm(forms.ModelForm):
 		fields = "__all__"
 
 class RequisitionForm(forms.Form):
-    produit = forms.ModelChoiceField(
-        widget = forms.Select(
-        	attrs = {'placeholder': '', 'class': 'form-control col-12'}
-        	),
-        queryset = Produit.objects.all(),
-        label = 'produit')
-    quantite = forms.FloatField(
-    	widget=forms.NumberInput(
-    		attrs={'step': "0.01", 'placeholder':'quantite','class':'form-control col-12'}
-    		))
+	produits_dispo = []
+	for x in Produit.objects.all():
+		if x.quantiteEnStock()>0:
+			produits_dispo.append(x.id)
+			
+	produit = forms.ModelChoiceField(
+	    widget = forms.Select(
+	    	attrs = {'placeholder': '', 'class': 'form-control col-12'}
+	    	),
+	    queryset = Produit.objects.filter(id__in=produits_dispo),
+	    label = 'produit')
+	quantite = forms.FloatField(
+		widget=forms.NumberInput(
+			attrs={'step': "0.01", 'placeholder':'quantite','class':'form-control col-12'}
+			))
+
+	# def __init__(self, *args, **kwargs):
+	# 	self.produits_dispo = []
+	# 	for x in Produit.objects.all():
+	# 		if x.quantiteEnStock()>0:
+	# 			self.produit.append(x.id)
+	# 	super(RequisitionForm, self).__init__(*args, **kwargs)
 
 class OffreForm(forms.ModelForm):
 	fournisseur = forms.ModelChoiceField(
