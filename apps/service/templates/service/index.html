@@ -14,11 +14,11 @@
 				cursor: grab;'>
 		<a href="{% url 'scommandes' table.id %}" class="text-decoration-none modal-link">
 		<div class="card-body m-auto col-12 p-1">
-			<ul class="list-group text-justify list-group-flush">
-				<li class="border-0 list-group-item p-0 text-center font-weight-bold">{{ table }}</li>
-				<li class="border-0 list-group-item p-0 text-center table-orders">commandes:<span class="badge badge-primary ml-2">0</span></li>
-				<li class="border-0 list-group-item p-0 text-center table-logs">no logs</li>
-			</ul>
+			<div class="text-justify">
+				<div class="border-0 p-0 text-center font-weight-bold">{{ table }}</div>
+				<div class="border-0 p-0 text-center table-orders">commandes:<span class="badge badge-primary ml-2">0</span></div>
+				<div class="border-0 p-0 text-center table-logs">no logs</div>
+			</div>
 		</div>
 		</a>
 	</div>
@@ -147,31 +147,27 @@ function updateTables(){
 		.done(function(data) {
 			var label = data.to_serve;//+"/"+data.total;
 			$(table).find('.badge-primary').text(label);
-			if (parseInt(data.to_serve) > 0) {
-				$(table).addClass('bg-success');
-				$(table).children('a').addClass('text-white');
-			}else{
-				$(table).removeClass('bg-success');
-				$(table).removeClass('text-white');
-			}
-			if(sessionStorage.getItem("urgent")>=1){
-				$(table).removeClass('bg-success');
+
+			$(table).removeClass('bg-danger bg-light bg-success text-white');
+			$(table).children('a').removeClass('text-dark text-white');
+			if(sessionStorage.getItem("urgent")>0){
 				if(data.urgent>0){
 					$(table).addClass('bg-danger');
 					$(table).children('a').addClass('text-white');
+					notify();
 				}else {
-					$(table).children('a').addClass('disabled');
-					$(table).children('a').addClass('text-dark');
+					$(table).children('a').addClass('disabled text-dark');
 					$(table).addClass('bg-light')
 					$(table).children('a').css({
 						cursor: 'no-drop',
 					});
 				}
-			}else{
-				$(table).removeClass('bg-danger');
-				$(table).removeClass('bg-light');
-				$(table).removeClass('text-white');
-				$(table).children('a').removeClass('text-dark');
+			}else {
+				if (parseInt(data.to_serve) > 0) {
+					$(table).addClass('bg-success');
+					$(table).children('a').addClass('text-white');
+					notify();
+				}
 			}
 		});
 	}
@@ -191,6 +187,9 @@ function updatePlaces(){
 			if(badge.text()!= label){
 				badge.text(label);
 				if($(place).hasClass('active')){
+					$(".client-table").children('a').css({
+						cursor: 'pointer',
+					});
 					updateTables();
 				}
 			}
@@ -232,6 +231,21 @@ function updatePlaces(){
 
 updatePlaces(10000);
 setInterval(updatePlaces, 10000);
+
+function notify(){
+	Notification.requestPermission().then(function(result){
+		var audio = new Audio("/static/son.mp3");
+		audio.play();
+		var notif = new Notification("Une commande est prête",{
+			icon:"",
+			body:"veuillez cliquer ici pour voir les détails",
+		})
+		notif.onClick = function(){
+			console.log("gooood notification clicked");
+		}
+		setTimeout(notif.close.bind(notif), 5000);
+	});
+}
 
 });	
 </script>
