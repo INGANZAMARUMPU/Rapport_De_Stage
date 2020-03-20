@@ -56,10 +56,10 @@ class RecetteAdmin(admin.ModelAdmin):
 	ordering = ("nom", "temp", "image", "prix", "details")
 
 class PanierAdmin(admin.ModelAdmin):
-	list_display = ("recette", "commande", "quantite", "somme", "pret")
-	list_filter = ("recette", "commande", "quantite", "somme", "pret")
-	search_field = ("recette", "commande", "quantite", "somme", "pret")
-	ordering = ("recette", "commande", "quantite", "somme", "pret")
+	list_display = ("recette", "commande", "quantite", "somme", "date", "pret")
+	list_filter = ("recette", "commande", "quantite", "somme", "date", "pret")
+	search_field = ("recette", "commande", "quantite", "somme", "date", "pret")
+	ordering = ("recette", "commande", "quantite", "somme", "date", "pret")
 
 class CommandeAdmin(admin.ModelAdmin):
 	list_display = ("table", "tel", "date", "a_payer", "payee", "reste", "servi", "commandee", "pret")

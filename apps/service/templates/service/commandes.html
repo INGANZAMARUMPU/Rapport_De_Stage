@@ -3,15 +3,19 @@
 <div id="accordion">
 	{% for commande in commandes %}
 		<div class="card commands_cards">
-			<a data-toggle="collapse" class="text-decoration-none" data-parent="#accordion" 
-				href="#collapse{{ commande.id }}" aria-expanded="true" 
-				aria-controls="collapse{{ commande.id }}">
-				<div class="card-header" id="headingOne">
+			<a data-toggle="collapse" class="text-decoration-none" 
+				data-target="#collapse{{ commande.id }}">
+				<div class="card-header">
 					commande {{ forloop.counter }}
-					<button data-id={{ commande.id }} class="float-right btn btn-primary btn-sm">m'en charger</button>
+					{% if not commande.serveur %}
+					<button data-id={{ commande.id }} 
+						class="float-right btn btn-primary btn-sm">
+						m'en charger
+					</button>
+					{% endif %}
 				</div>
 			</a>
-			<div id="collapse{{ commande.id }}" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingOne">
+			<div id="collapse{{ commande.id }}" class="collapse">
 				<div class="card-body">
 					<ul>
 					{% for panier in commande.paniers %}
@@ -25,7 +29,37 @@
 </div>
 <script type="text/javascript">
 $(document).ready(function(){
-
+	$("#accordion").on('click', 'a', function(event) {
+		target = $($(this).attr('data-target'));
+		target.toggleClass('show');
+		event.preventDefault();
+		event.stopPropagation();
+	});
+	$("#accordion").on('click', 'button', function(event) {
+		event.preventDefault();
+		event.stopPropagation();
+		btn = $(this);
+		commande = $(this).attr('data-id');
+		console.log(sessionStorage.getItem("urgent_list").split(","));
+		console.log(commande);
+		if(sessionStorage.getItem("urgent")<1 |
+			sessionStorage.getItem("urgent_list")
+			.split(",").includes(commande)){
+			$.ajax({
+				url: `/api/commande/${commande}/se_charger/`,
+				type: 'PUT',
+				dataType: 'json',
+				headers:{"X-CSRFToken":$.cookie("csrftoken")},
+			})
+			.done(function(data) {
+				console.log(data);
+				btn.remove();
+			})
+			.fail(function() {
+				console.log("error");
+			})
+		}	
+	});
 });
 </script>
 {% endblock body %}

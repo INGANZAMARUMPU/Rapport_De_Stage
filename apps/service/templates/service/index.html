@@ -2,30 +2,7 @@
 {% load mathfilters %}
 {% block main %}
 {% if ordered %}
-<div class="container">
-	<div class="row">		
-	{% for table in tables %}
-		<div class="mt-2 p-1 col-6 col-sm-4 col-md-3 col-xl-2">
-			<div class="card client-table" data-id="{{ table.id }}"
-			style='	-moz-user-select: -moz-none;
-					-khtml-user-select: none;
-					-webkit-user-select: none;'>
-				<a href="{% url 'scommandes' table.id %}" class="text-decoration-none modal-link">
-				<div class="card-body m-auto col-12 p-0">
-					<ul class="list-group text-justify list-group-flush">
-						<li class="border-0 list-group-item p-0 text-center font-weight-bold">{{ table }}</li>
-						<li class="border-0 list-group-item p-0 text-center table-orders">commandes:<span class="badge badge-primary ml-2">0/0</span></li>
-						<li class="border-0 list-group-item p-0 text-center table-logs">no logs</li>
-					</ul>
-				</div>
-				</a>
-			</div>
-		</div>
-	{% endfor %}
-	</div>
-</div>
-{% else %}
-	<div class="bg-light mb-2" id="workspace" style="position:relative;width:1000px; height:500px">
+<div class="bg-light mb-2" id="workspace" style="position:relative;width:1000px; height:500px">
 	{% for table in tables %}
 	<div class="card client-table" data-id="{{ table.id }}"
 		style='	left:{{ table.x }}px;
@@ -39,7 +16,7 @@
 		<div class="card-body m-auto col-12 p-1">
 			<ul class="list-group text-justify list-group-flush">
 				<li class="border-0 list-group-item p-0 text-center font-weight-bold">{{ table }}</li>
-				<li class="border-0 list-group-item p-0 text-center table-orders">commandes:<span class="badge badge-primary ml-2">0/0</span></li>
+				<li class="border-0 list-group-item p-0 text-center table-orders">commandes:<span class="badge badge-primary ml-2">0</span></li>
 				<li class="border-0 list-group-item p-0 text-center table-logs">no logs</li>
 			</ul>
 		</div>
@@ -54,6 +31,29 @@
 		</label>
 		<div id="log">no logs</div>
 	</div>
+{% else %}
+<div class="container">
+	<div class="row">		
+	{% for table in tables %}
+		<div class="mt-2 p-1 col-6 col-sm-4 col-md-3 col-xl-2">
+			<div class="card client-table" data-id="{{ table.id }}"
+			style='	-moz-user-select: -moz-none;
+					-khtml-user-select: none;
+					-webkit-user-select: none;'>
+				<a href="{% url 'scommandes' table.id %}" class="text-decoration-none modal-link">
+				<div class="card-body m-auto col-12 p-0">
+					<div class="text-justify">
+						<div class="border-0 p-0 text-center font-weight-bold">{{ table }}</div>
+						<div class="border-0 p-0 text-center table-orders">commandes:<span class="badge badge-primary ml-2">0</span></div>
+						<div class="border-0 p-0 text-center table-logs">no logs</div>
+					</div>
+				</div>
+				</a>
+			</div>
+		</div>
+	{% endfor %}
+	</div>
+</div>	
 {% endif %}
 <div class="modal fade " id="myModal" role="dialog">
     <div class="modal-dialog">
@@ -136,6 +136,7 @@ jQuery(document).ready(function($) {
 	    }
 	});
 // ==================== fin code drag'n'drop ====================
+function updateTables(){
 	for(let table of $(".client-table")){
 		let table_id = $(table).attr('data-id');
 		$.ajax({
@@ -144,39 +145,94 @@ jQuery(document).ready(function($) {
 			dataType: 'json',
 		})
 		.done(function(data) {
-			$(table).find('.badge-primary').text(data.to_serve+"/"+data.total);
+			var label = data.to_serve;//+"/"+data.total;
+			$(table).find('.badge-primary').text(label);
 			if (parseInt(data.to_serve) > 0) {
 				$(table).addClass('bg-success');
-				$(table).find('li').addClass('bg-success text-light');
+				$(table).children('a').addClass('text-white');
+			}else{
+				$(table).removeClass('bg-success');
+				$(table).removeClass('text-white');
+			}
+			if(sessionStorage.getItem("urgent")>=1){
+				$(table).removeClass('bg-success');
+				if(data.urgent>0){
+					$(table).addClass('bg-danger');
+					$(table).children('a').addClass('text-white');
+				}else {
+					$(table).children('a').addClass('disabled');
+					$(table).children('a').addClass('text-dark');
+					$(table).addClass('bg-light')
+					$(table).children('a').css({
+						cursor: 'no-drop',
+					});
+				}
+			}else{
+				$(table).removeClass('bg-danger');
+				$(table).removeClass('bg-light');
+				$(table).removeClass('text-white');
+				$(table).children('a').removeClass('text-dark');
 			}
 		});
 	}
+}
+function updatePlaces(){
 	for(let place of $(".place")){
 		let place_id = $(place).attr('data-id');
+
 		$.ajax({
 			url: '/api/commande/'+place_id+'/place_comands_count/',
 			type: 'GET',
 			dataType: 'json',
 		})
 		.done(function(data) {
-			$(place).find('.badge-primary').text(data.to_serve+"/"+data.total);
-			// if (parseInt(data.to_serve) > 0) {
-			// 	$(place).addClass('bg-success');
-			// 	$(place).find('li').addClass('bg-success text-light');
-			// }
+			var label = data.to_serve;//+"/"+data.total;
+			badge = $(place).find('.badge');
+			if(badge.text()!= label){
+				badge.text(label);
+				if($(place).hasClass('active')){
+					updateTables();
+				}
+			}
+			if(parseInt(data.urgent)>=1){
+				badge.removeClass('badge-primary');
+				badge.addClass('badge-danger')
+			}else{
+				badge.addClass('badge-primary');
+				badge.removeClass('badge-danger')
+			}
+			sessionStorage.setItem("urgent", data.urgent);
 		});
 	}
-
+	if(sessionStorage.getItem("urgent")>0){
+		$.ajax({
+			url: '/api/commande/urgent/',
+			type: 'GET',
+			dataType: 'json',
+		})
+		.done(function(data) {
+			sessionStorage.setItem("urgent_list", data.urgent_list);
+		})		
+	}
+	console.log(sessionStorage.getItem("urgent"));
+	console.log(sessionStorage.getItem("urgent_list"));
+}
 	$('.modal-link').on('click',function(event){
 	    event.preventDefault();
 	    event.stopPropagation();
-	    if (!$('#edit_mode').is(':checked')){
-		    $('.modal-body').load($(this).attr('href'),function(){
-		    	$('#myModal').modal('handleUpdate')
-		        $('#myModal').modal({show:true});
-		    });
+	    if(!$(this).hasClass('disabled')){
+		    if (!$('#edit_mode').is(':checked')){
+			    $('.modal-body').load($(this).attr('href'),function(){
+			    	$('#myModal').modal('handleUpdate')
+			        $('#myModal').modal({show:true});
+			    });
+			}
 		}
 	}); 
+
+updatePlaces(10000);
+setInterval(updatePlaces, 10000);
+
 });	
 </script>
 {% endblock main %}				

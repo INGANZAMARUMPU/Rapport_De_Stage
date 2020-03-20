@@ -166,13 +166,17 @@ class Panier(models.Model):
 	quantite = models.PositiveIntegerField(default=1)
 	somme = models.PositiveIntegerField(blank=True, verbose_name='à payer')
 	pret = models.BooleanField(default=False)
+	date = models.DateTimeField(default=timezone.now)
 
 	def save(self, *args, **kwargs):
 		self.somme = self.recette.prix*self.quantite
+		if(self.pret!=True):
+			self.date = timezone.now()
 		super(Panier, self).save(*args, **kwargs)
 
 	class Meta:
 		unique_together = ('commande','recette')
+		ordering = ['date']
 			
 	def __str__(self):
 		return f"{self.recette}"

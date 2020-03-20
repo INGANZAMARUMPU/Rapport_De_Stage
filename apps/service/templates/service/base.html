@@ -1,15 +1,15 @@
 {% extends "base.html" %}
 {% block interface %}
 {% for place in places %}
-    <a class="nav-link pb-0 place" data-id="{{ place.id }}" href="{% url 'service' place.id %}">
-        <div class="sb-nav-link-icon"><i class="fas fa-box"></i></div>
-        {{ place }} flat
-        <span class="badge badge-primary ml-2">0/0</span>
-    </a>
-    <a class="nav-link pt-0 place" data-id="{{ place.id }}" href="{% url 'service' place.id 1 %}">
+    <a class="nav-link pb-0 place {% if place_id == place.id %}active{% endif %}" data-id="{{ place.id }}" href="{% url 'service' place.id %}">
         <div class="sb-nav-link-icon"><i class="fas fa-box"></i></div>
         {{ place }}
-        <span class="badge badge-primary ml-2">0/0</span>
+        <span class="badge badge-primary ml-2">0</span>
+    </a>
+    <a class="nav-link pt-0 place d-none d-sm-flex" data-id="{{ place.id }}" href="{% url 'service' place.id  1 %}">
+        <div class="sb-nav-link-icon"><i class="fas fa-box"></i></div>
+        {{ place }} map
+        <span class="badge badge-primary ml-2">0</span>
     </a>
 {% endfor %}
 {% endblock interface %}

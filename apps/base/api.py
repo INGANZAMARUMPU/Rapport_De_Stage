@@ -6,12 +6,14 @@ from rest_framework.response import Response
 from rest_framework import viewsets
 
 from django.shortcuts import render
+from django.db.models import F, Count
+from django.contrib.auth.models import Group
+
+from datetime import date, timedelta, datetime
 
 from .models import *
-from django.contrib.auth.models import Group
-from datetime import date, timedelta, datetime
 from .serializers import *
-from django.db.models import F, Count
+from .decorators import allowed_users
 
 # Create your views here.
 class ChartServiceViewset(viewsets.ViewSet):
@@ -314,38 +316,86 @@ class DeepPanierViewSet(viewsets.ModelViewSet):
 		serializer = DeepPanierSerializer(queryset, many=True)
 		return Response(serializer.data)
 
+	@action(methods=["GET"],url_path=r"lasts/(?P<last_id>[0-9]+)",url_name="last_paniers", detail=False)
+	def lasts(self, request, last_id):
+		last = Panier.objects.get(id=last_id)
+		queryset = Panier.objects.filter(pret=False, commande__commandee=True, date__gt=last.date)
+		serializer = DeepPanierSerializer(queryset, many=True)
+		return Response(serializer.data)
+		# return Response({})
+
+	@action(methods=["GET"],url_path=r"all",url_name="paniers_c", detail=False)
+	def all(self, request):
+		queryset = Panier.objects.filter(pret=False, commande__commandee=True)
+		serializer = DeepPanierSerializer(queryset, many=True)
+		return Response(serializer.data)
+		# return Response({})
+
 class CommandeViewset(viewsets.ModelViewSet):
 	authentication_classes = [SessionAuthentication]
 	permission_classes = [IsAuthenticated]
 	queryset = Commande.objects.all()
 	serializer_class = CommandeSerializer
 
-	@action(methods=['get'], detail=False, \
+	@action(methods=['GET'], detail=False, \
 		url_path=r'(?P<table_id>[0-9]+)/commands_count',\
 		url_name='table_commands_count')
 	def nTableCom(self, request, table_id):
 		table = Table.objects.get(id=table_id)
 		total = Commande.objects.filter(table=table, commandee=True, servi=False)
-		already = total.filter(serveur__isnull=True)
-		return Response({"total":total.count(), "to_serve":already.count()})
+		to_serve = total.filter(serveur__isnull=True)
+		ready = total.filter(serveur=request.user, pret=True)
+		urgent = total.filter(serveur__isnull=True, pret=True)
+		return Response({
+			"total":total.count(), 
+			"to_serve":to_serve.count(),
+			"ready":ready.count(),
+			"urgent":urgent.count()
+			})
 
-	@action(methods=['get'], detail=False, \
+	@action(methods=['GET'], detail=False, \
 		url_path=r'(?P<place_id>[0-9]+)/place_comands_count',\
 		url_name='place_comands_count')
 	def nPlaceCom(self, request, place_id):
 		# place = Place.objects.get(id=place_id)
 		tables = Table.objects.filter(place=place_id)
 		total = Commande.objects.filter(table__in=tables, commandee=True, payee=False)
-		already = Commande.objects.filter(table__in=tables, commandee=True, payee=False, serveur__isnull=True)
-		return Response({"total":total.count(), "to_serve":already.count()})
+		to_serve = total.filter(serveur__isnull=True)
+		ready = total.filter(serveur=request.user, pret=True)
+		urgent = total.filter(serveur__isnull=True, pret=True)
+		return Response({
+			"total":total.count(), 
+			"to_serve":to_serve.count(),
+			"ready":ready.count(),
+			"urgent":urgent.count(),
+			"urgent_list":[x.id for x in urgent]
+			})
 
-	@action(methods=['get'], detail=False,
+	@action(methods=['GET'], detail=False, url_path=r'urgent', url_name='urgent')
+	def urgetn(self, request):
+		commandes = Commande.objects.filter(pret=True, serveur__isnull=True)
+		return Response({
+			"urgent_list":[x.id for x in commandes]
+			})
+
+	@action(methods=['GET'], detail=False,
 		url_path=r'(?P<table_id>[0-9]+)/all_commands',
 		url_name='table_commands')
 	def TableCom(self, request, table_id):
 		table = Table.objects.get(id=table_id)
 		queryset = Commande.objects.filter(table=table, commandee=True, payee=False)
 		serializer = CommandeSerializer(queryset, many=True)
+		return Response(serializer.data)
+
+	@action(methods=['PUT'], detail=True,
+		url_path=r'se_charger', url_name='se_charger')
+	# @allowed_users(groups=['serveur, admin'])
+	def seCharger(self, request, pk):
+		commande = Commande.objects.get(id=pk)
+		if not commande.serveur:
+			commande.serveur = request.user
+		commande.save()
+		serializer = CommandeSerializer(commande, many=False)
 		return Response(serializer.data)
 
 class PaiementViewset(viewsets.ModelViewSet):

@@ -1,16 +1,36 @@
 {% extends "cuisine/base.html" %}
+{% load static %}
 {% block main %}
 <div class="container">
-	<div class="row parent">
+	<div class="row parent" id="paniers">
 	{% for commande in commandes %}
-	<div class="commande" data-id="{{ commande.id }}" style="display:none"></div>
+		{% for panier in commande.paniers %}
+			<div class="mt-2 col-md-4 col-xl-3 col-xs-12 col-sm-6 template-parent">
+				<div class="card bg-light">
+					<img class="card-img-top" src="{{ panier.recette.image.url }}" alt="Card image cap">
+					<div class="card-body">
+					  <ul class="list-group bg-light list-group-flush">
+					    <li class="list-group-item p-0 bg-light text-bold">
+					    	<strong>{{ panier.recette.nom }}</strong>
+					    </li>
+					  </ul>
+					</div>
+					<div class="card-footer text-muted">
+						<button class="btn btn-sm btn-success
+						col-12 btn-valider-pret" data-id='{{ panier.id }}'>
+							pret
+						</button>
+					</div>
+				</div>
+			</div>
+		{% endfor %}
 	{% endfor %}
 	</div>
 </div>
 <script type="text/javascript">
 
 jQuery(document).ready(function($) {
-let renderTemplate = (parent, image, nom, panier_id, commande, recette) =>{
+let renderTemplate = (parent, image, nom, panier_id) =>{
 	let template =`
 <div class="mt-2 col-md-4 col-xl-3 col-xs-12 col-sm-6 template-parent">
 	<div class="card bg-light">
@@ -33,33 +53,8 @@ let renderTemplate = (parent, image, nom, panier_id, commande, recette) =>{
 	parent.append(template);
 }
 const $all_commandes = $(".commande");
-
-for (var i=0; i < $all_commandes.length; i++){
-	let $div = $($all_commandes[i]);
-	let $parent = $div.parent('.parent');
-	comm_id = $div.attr('data-id');
-	$.ajax({
-		url: '/api/deep_panier/commande/'+comm_id+'/',
-		type: 'GET',
-		dataType: 'json',
-	})
-	.done(function(data) {
-		for(let panier of data ){
-			renderTemplate($parent,
-				panier.recette.image,panier.recette.nom,
-				panier.id, panier.commande, panier.recette);
-		}
-	})
-	.fail(function() {
-		console.log("error");
-	})
-	.always(function() {
-	});
-}
-// $("main").delegate('.btn-valider-pret', 'click', function(event) {
 $("main").on('click', '.btn-valider-pret', function(event) {
 	let $btn = $(this);
-	console.log($btn);
 	let panier_id = $btn.attr('data-id');
 	data = {pret: true,};
 	$.ajax({
@@ -70,7 +65,6 @@ $("main").on('click', '.btn-valider-pret', function(event) {
 		data: data,
 	})
 	.done(function() {
-		console.log("template-parent");
 		let $parent = $btn.closest(".template-parent");
 		$parent.fadeOut('slow', function() {
 			$(this).remove();
@@ -80,9 +74,36 @@ $("main").on('click', '.btn-valider-pret', function(event) {
 		console.log("error");
 	})
 	.always(function() {
+		update();
 	});
 
 });
+let update = ()=>{
+	$last = $(".btn-valider-pret").last().attr('data-id');
+	if($last === undefined){
+		url = '/api/deep_panier/all/';
+	}else{
+		url = '/api/deep_panier/lasts/'+$last;
+	}
+	$.ajax({
+		url: url,
+		type: 'GET',
+		dataType: 'json',
+	})
+	.done(function(data) {
+		if(data.length > 0){
+			$parent = $("#paniers");
+			for(let panier of data){
+				renderTemplate($parent, panier.recette.image, panier.recette.nom, panier.id,)
+			}
+		}
+	})
+	.fail(function() {
+	})
+	.always(function() {
+	});
+}
+setInterval(update, 60000);
 });
 </script>
 {% endblock main %}
