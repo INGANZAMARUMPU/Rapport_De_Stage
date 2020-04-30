@@ -341,13 +341,12 @@ class CommandeViewset(viewsets.ModelViewSet):
 		url_path=r'(?P<table_id>[0-9]+)/commands_count',\
 		url_name='table_commands_count')
 	def nTableCom(self, request, table_id):
-		table = Table.objects.get(id=table_id)
-		total = Commande.objects.filter(table=table, commandee=True, servi=False)
+		total = Commande.objects.filter(table=table_id, commandee=True)
 		to_serve = total.filter(serveur__isnull=True)
-		ready = total.filter(serveur=request.user, pret=True)
-		urgent = total.filter(serveur__isnull=True, pret=True)
+		ready = total.filter(serveur=request.user, pret=True, servi=False)
+		urgent = total.filter(serveur__isnull=True, pret=True, servi=False)
 		return Response({
-			"total":total.count(), 
+			"total":total.filter(payee__lte=0).count(), 
 			"to_serve":to_serve.count(),
 			"ready":ready.count(),
 			"urgent":urgent.count()

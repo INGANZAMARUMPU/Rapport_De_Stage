@@ -15,7 +15,7 @@ def service(request, place_id=None, ordered=None):
 
 @login_required
 def commandes(request, table_id):
-	commandes = Commande.objects.filter(table=table_id, payee__lt=1, commandee=True)
+	commandes = Commande.objects.filter(table=table_id, servi=False, commandee=True)
 	print(commandes)
 	return render(request, 'service/commandes.html', locals())
 	

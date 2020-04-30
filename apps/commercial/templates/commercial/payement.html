@@ -22,7 +22,7 @@
                                 <div>
                                     <label>à payer</label>
                                     <label id="lbl_a_payer" class="font-weight-bold">
-                                        {{ a_payer }}
+                                        {{ a_payer|default:0 }}
                                     </label>
                                 </div>
                                 {% csrf_token %}
@@ -39,6 +39,25 @@
                             </form>
                         </div>
                     </div>
+                    {% for commande in commandes %}
+                        <div class="card commands_cards mt-2">
+                            <a data-toggle="collapse" class="text-decoration-none" 
+                                data-target="#collapse{{ commande.id }}">
+                                <div class="card-header">
+                                    commande {{ forloop.counter }}
+                                </div>
+                            </a>
+                            <div id="collapse{{ commande.id }}" class="collapse">
+                                <div class="card-body">
+                                    <ul>
+                                    {% for panier in commande.paniers %}
+                                        <li>{{ panier.quantite }} {{ panier.recette.nom }}</li>
+                                    {% endfor %}
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
                 </div>
             </main>
         </div>

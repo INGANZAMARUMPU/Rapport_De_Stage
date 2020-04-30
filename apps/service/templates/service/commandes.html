@@ -1,4 +1,6 @@
 {% extends "table/base.html" %}
+{% load static %}
+{% load mathfilters %}
 {% block body %}
 <div id="accordion">
 	{% for commande in commandes %}
@@ -9,9 +11,16 @@
 					commande {{ forloop.counter }}
 					{% if not commande.serveur %}
 					<button data-id={{ commande.id }} 
-						class="float-right btn btn-primary btn-sm">
+						class="float-right btn btn-primary btn-sm m_en_charger">
 						m'en charger
 					</button>
+					{% else %}
+						{% if commande.pret and not commande.servi %}
+						<button data-id={{ commande.id }} 
+							class="float-right btn btn-primary btn-sm deja_servi">
+							déjà servi
+						</button>
+						{% endif %}
 					{% endif %}
 				</div>
 			</a>
@@ -27,6 +36,68 @@
 		</div>
 	{% endfor %}
 </div>
+<div class="row m-2 col-12">
+	<button class="float-right btn btn-sm btn-primary" onclick="printDiv()">imprimer la facture</button>
+</div>
+<div id="facture" style="display:none;">
+<div style=" width:155px">
+	<img src="{% static "img/favicon.ico" %}">
+	<br>
+	<span style="font-weight: bold">
+	{{ commande.table.user.username }}<br>
+	{{ commande.tel }}<br>
+	{{ commande.date }}<br><br>
+	</span>
+	<table>
+	        <thead style="background-color:light-gray">
+	            <tr>
+	                <th>Q</th>
+	                <th>produit</th>
+	                <th>P.U</th>
+	                <th>Tot</th>
+	            </tr>
+	        </thead>
+	        <tbody>
+
+			{% for commande in commandes %}
+		        {% for panier in commande.paniers %}
+		            <tr style="border-bottom:1px solid black">
+		                <td style="max-width:20px;">{{ panier.quantite|floatformat:0 }}</td>
+		                <td style="font-weight: bold;max-width:75px;">{{ panier.recette.nom }} </td>
+		                <td style="max-width:30px;">{{ panier.recette.prix|floatformat:0 }}</td>
+		                <td style="max-width:30px;">{{ panier.recette.prix|mul:panier.quantite }}</td>
+		            </tr>
+		        {% endfor %}
+	            <tr>
+	                <td></td>
+	                <td></td>
+	                <td>
+	                    <b style="font-weight: bold">Total</b><br>
+	                    <b style="font-weight: bold">payée</b><br>
+	                    <b style="font-weight: bold">reste</b><br>
+	                </td>
+	                <td>
+	                    <b>{{ commande.a_payer|floatformat:0 }}</b><br>
+	                    <b>{{ commande.payee|default_if_none:"0"|floatformat:0 }}</b><br>
+	                    <b>{{ commande.reste|default_if_none:commande.a_payer|floatformat:0 }}</b><br>
+	                </td>
+	            </tr>
+		    {% endfor %}
+	        </tbody>
+	    </table>
+	    <br>
+	    <b>nom du serveur</b>
+	    <br>
+	    <b>{{ commande.serveur.first_name }}</b>
+	    <b>{{ commande.serveur.last_name }}</b>
+	    <br>
+	    <hr>
+	    <div class="centered" style="text-align:center;">
+	        <b style="word-break: initial;" >Turabashimiye cane kuba mwadushoreye</b>
+	    </div>
+	    <hr>
+	</div>
+</div>
 <script type="text/javascript">
 $(document).ready(function(){
 	$("#accordion").on('click', 'a', function(event) {
@@ -35,31 +106,57 @@ $(document).ready(function(){
 		event.preventDefault();
 		event.stopPropagation();
 	});
-	$("#accordion").on('click', 'button', function(event) {
+	$("#accordion").on('click', '.m_en_charger', function(event) {
+		event.preventDefault();
+		event.stopPropagation();
+		btn = $(this);
+		$.ajax({
+			url: `/api/commande/${btn.attr('data-id')}/se_charger/`,
+			type: 'PUT',
+			dataType: 'json',
+			headers:{"X-CSRFToken":$.cookie("csrftoken")},
+		})
+		.done(function(data) {
+			console.log(data);
+			btn.remove();
+		})
+		.fail(function() {
+			console.log("error");
+		})
+	});
+	$("#accordion").on('click', '.deja_servi', function(event) {
 		event.preventDefault();
 		event.stopPropagation();
 		btn = $(this);
 		commande = $(this).attr('data-id');
-		console.log(sessionStorage.getItem("urgent_list").split(","));
-		console.log(commande);
-		if(sessionStorage.getItem("urgent")<1 |
-			sessionStorage.getItem("urgent_list")
-			.split(",").includes(commande)){
-			$.ajax({
-				url: `/api/commande/${commande}/se_charger/`,
-				type: 'PUT',
-				dataType: 'json',
-				headers:{"X-CSRFToken":$.cookie("csrftoken")},
-			})
-			.done(function(data) {
-				console.log(data);
-				btn.remove();
-			})
-			.fail(function() {
-				console.log("error");
-			})
-		}	
+		$.ajax({
+			url: `/api/commande/${commande}/`,
+			type: 'PATCH',
+			dataType: 'json',
+			data:{servi:true},
+			headers:{"X-CSRFToken":$.cookie("csrftoken")},
+		})			
+		.done(function(data) {
+			console.log(data);
+			btn.remove();
+		})
+		.fail(function() {
+			console.log("error");
+		})	
 	});
 });
+
+
+function printDiv() { 
+	var divContents = document.getElementById("facture").innerHTML; 
+	var a = window.open('', '', 'height=500, width=1000'); 
+	a.document.write('<html>'); 
+	a.document.write('<body>'); 
+	a.document.write(divContents); 
+	a.document.write('</body></html>'); 
+	a.document.close(); 
+	a.print(); 
+} 
+
 </script>
 {% endblock body %}

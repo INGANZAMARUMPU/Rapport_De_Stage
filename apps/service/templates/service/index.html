@@ -44,7 +44,18 @@
 				<div class="card-body m-auto col-12 p-0">
 					<div class="text-justify">
 						<div class="border-0 p-0 text-center font-weight-bold">{{ table }}</div>
-						<div class="border-0 p-0 text-center table-orders">commandes:<span class="badge badge-primary ml-2">0</span></div>
+						<div class="border-0 p-0 text-center table-commandes">
+							commandés:
+							<span class="badge badge-primary ml-2">0</span>
+						</div>
+						<div class="border-0 p-0 text-center table-prets">
+							prets:
+							<span class="badge badge-primary ml-2">0</span>
+						</div>
+						<div class="border-0 p-0 text-center table-urgents">
+							urgents:
+							<span class="badge badge-primary ml-2">0</span>
+						</div>
 						<div class="border-0 p-0 text-center table-logs">no logs</div>
 					</div>
 				</div>
@@ -136,42 +147,55 @@ jQuery(document).ready(function($) {
 	    }
 	});
 // ==================== fin code drag'n'drop ====================
-function updateTables(){
-	for(let table of $(".client-table")){
-		let table_id = $(table).attr('data-id');
-		$.ajax({
-			url: '/api/commande/'+table_id+'/commands_count/',
-			type: 'GET',
-			dataType: 'json',
-		})
-		.done(function(data) {
-			var label = data.to_serve;//+"/"+data.total;
-			$(table).find('.badge-primary').text(label);
-
-			$(table).removeClass('bg-danger bg-light bg-success text-white');
-			$(table).children('a').removeClass('text-dark text-white');
-			if(sessionStorage.getItem("urgent")>0){
-				if(data.urgent>0){
-					$(table).addClass('bg-danger');
-					$(table).children('a').addClass('text-white');
-					notify();
-				}else {
-					$(table).children('a').addClass('disabled text-dark');
-					$(table).addClass('bg-light')
-					$(table).children('a').css({
-						cursor: 'no-drop',
-					});
-				}
-			}else {
-				if (parseInt(data.to_serve) > 0) {
-					$(table).addClass('bg-success');
-					$(table).children('a').addClass('text-white');
-					notify();
-				}
-			}
-		});
+tables = $(".client-table");
+function updateTables(i){
+	console.log("======================",tables.length);
+	if(i<tables.length){
+		table = tables[i];
+		tables = tables.not(table);
+	}else{
+		return;
 	}
+	let table_id = $(table).attr('data-id');
+	$.ajax({
+		url: '/api/commande/'+table_id+'/commands_count/',
+		type: 'GET',
+		dataType: 'json',
+		async:false
+	})
+	.done(function(data) {
+		console.log(data);
+		lbl_commandes = $(table).find('.table-commandes').find('.badge-primary');
+		lbl_prets = $(table).find('.table-prets').find('.badge-primary');
+		lbl_urgents = $(table).find('.table-urgents').find('.badge-primary');
+		if ((parseInt(data.urgent) > parseInt(lbl_urgents.text())) ||
+			parseInt(data.ready) > parseInt(lbl_prets.text())){
+			for(let t of tables){
+				changeBackground(t, 'bg-light')
+				$(t).children('a').css({
+					cursor: 'no-drop',
+				});
+			}
+			changeBackground(table, 'bg-danger')
+			notify();
+			lbl_commandes.text(data.to_serve);
+			lbl_prets.text(data.ready);
+			lbl_urgents.text(data.urgent);
+			return;
+		}
+		if (parseInt(data.to_serve) > 0) {
+			changeBackground(table, 'bg-success');
+			notify();
+		}else{
+			changeBackground(table, null);
+		}
+		lbl_commandes.text(data.to_serve);
+		lbl_prets.text(data.ready);
+		lbl_urgents.text(data.urgent);
+		updateTables(++i);
+	});
 }
+updateTables(1);
 function updatePlaces(){
 	for(let place of $(".place")){
 		let place_id = $(place).attr('data-id');
@@ -182,39 +206,36 @@ function updatePlaces(){
 			dataType: 'json',
 		})
 		.done(function(data) {
-			var label = data.to_serve;//+"/"+data.total;
+			var new_label = data.to_serve;//+"/"+data.total;
 			badge = $(place).find('.badge');
-			if(badge.text()!= label){
-				badge.text(label);
+			if(parseInt(data.urgent)>=1){
+				badge.removeClass('badge-primary');
+				badge.addClass('badge-danger');
 				if($(place).hasClass('active')){
 					$(".client-table").children('a').css({
 						cursor: 'pointer',
 					});
-					updateTables();
+					tables = $(".client-table");
+					updateTables(1);
 				}
-			}
-			if(parseInt(data.urgent)>=1){
-				badge.removeClass('badge-primary');
-				badge.addClass('badge-danger')
+			} 
+			else if(badge.text()!= new_label){
+				badge.text(new_label);
+				badge.removeClass('badge-danger');
+				badge.addClass('badge-primary');
+				if($(place).hasClass('active')){
+					$(".client-table").children('a').css({
+						cursor: 'pointer',
+					});
+					tables = $(".client-table");
+					updateTables(1);
+				}
 			}else{
 				badge.addClass('badge-primary');
 				badge.removeClass('badge-danger')
 			}
-			sessionStorage.setItem("urgent", data.urgent);
 		});
 	}
-	if(sessionStorage.getItem("urgent")>0){
-		$.ajax({
-			url: '/api/commande/urgent/',
-			type: 'GET',
-			dataType: 'json',
-		})
-		.done(function(data) {
-			sessionStorage.setItem("urgent_list", data.urgent_list);
-		})		
-	}
-	console.log(sessionStorage.getItem("urgent"));
-	console.log(sessionStorage.getItem("urgent_list"));
 }
 	$('.modal-link').on('click',function(event){
 	    event.preventDefault();
@@ -228,8 +249,7 @@ function updatePlaces(){
 			}
 		}
 	}); 
-
-updatePlaces(10000);
+updatePlaces();
 setInterval(updatePlaces, 10000);
 
 function notify(){
@@ -247,6 +267,20 @@ function notify(){
 	});
 }
 
+function changeBackground(table, backgound){
+	$(table).removeClass('bg-danger bg-light bg-success text-white');
+	$(table).children('a').removeClass('text-dark text-white');
+	if(backgound===null){
+		return
+	}else{
+		$(table).addClass(backgound);
+		if(backgound!=='bg-light'){
+			$(table).children('a').addClass('text-white');
+		}else{
+			$(table).children('a').addClass('disabled text-dark');
+		}
+	}
+}
 });	
 </script>
 {% endblock main %}				
