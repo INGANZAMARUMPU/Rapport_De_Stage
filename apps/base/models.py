@@ -3,6 +3,7 @@ from django.db.models import Sum
 from django.utils import timezone
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save, pre_save
+from django.db.models import Q
 
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
@@ -42,6 +43,14 @@ class Table(models.Model):
 
 	def __str__(self):
 		return f"{self.user.username}"
+
+	def commandees(self):
+		return Commande.objects.filter(table=self, servi=False,commandee=True, serveur__isnull=True).count()
+
+	def urgent(self, request):
+		# return Commande.objects.filter(table=self, servi=False,commandee=True, pret=True)\
+		# .filter(Q(serveur__isnull=True) | Q(serveur=request.user )).count()
+		return 2
 
 class Produit(models.Model):
 	nom = models.CharField(max_length=64, unique=True)
