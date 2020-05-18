@@ -2,6 +2,7 @@ from django.shortcuts import render, get_object_or_404
 from django.contrib import messages
 from django.db import IntegrityError
 from apps.base.models import *
+from apps.base.forms import *
 from apps.base.decorators import allowed_users
 
 @allowed_users(groups=['table'])
@@ -38,6 +39,10 @@ def feedback(request):
 	commandes = Commande.objects.filter(table=table,\
 	commandee=True, servi=True, pret=True)
 	paniers = Panier.objects.filter(commande__in=commandes)
+	if request.method == "POST":
+		form = FeedBackForm(request.POST)
+		if form.is_valid():
+			form.save()
 	return render(request, 'table/feeds.html', locals())
 
 @allowed_users(groups=['table'])

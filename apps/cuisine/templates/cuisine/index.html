@@ -7,11 +7,15 @@
 		{% for panier in commande.paniers %}
 			<div class="mt-2 col-md-4 col-xl-3 col-xs-12 col-sm-6 template-parent">
 				<div class="card bg-light">
-					<img class="card-img-top" src="{{ panier.recette.image.url }}" alt="Card image cap">
-					<div class="card-body">
+					<img class="card-img-top" src="{{ panier.recette.image.url }}" alt="Card image cap"{% if panier.obligations %} onclick="alert('{{ panier.obligations }}');"{% endif %}>
+					<div class="card-body" {% if panier.obligations %} onclick="alert('{{ panier.obligations }}');"{% endif %}>
 					  <ul class="list-group bg-light list-group-flush">
 					    <li class="list-group-item p-0 bg-light text-bold">
-					    	<strong>{{ panier.recette.nom }}</strong>
+					    	<strong {% if panier.obligations %} class="text-primary"{% endif %}>{{ panier.recette.nom }} 
+					    		{% if panier.obligations %}
+					    			<i class="fas fa-sms text-danger"></i>
+					    		{% endif %}
+					    	</strong>
 					    </li>
 					  </ul>
 					</div>
