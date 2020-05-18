@@ -17,9 +17,12 @@
 			        </div>
 			        <span class="star_count">&emsp;0</span> star(s)
 			    </div>
-                <form accept-charset="UTF-8" action="" method="post">
-                    <textarea class="form-control animated" cols="50" name="comment" placeholder="Enter your review here..." rows="3">
-                    </textarea>
+                <form accept-charset="UTF-8" action="." method="post">
+                	{% csrf_token %}
+                	<input type="hidden" name="stars" class="input_stars" value="">
+                	<input type="hidden" name="recette" value="{{ panier.recette.id }}">
+                	<input type="hidden" name="commande" value="{{ panier.commande.id }}">
+                    <textarea class="form-control animated" cols="50" name="commentaire" placeholder="Enter your review here..." rows="3"></textarea>
                     <button class="btn btn-success btn-sm mt-1 float-right" type="submit">soumettre</button>
                 </form>
             </div>
@@ -64,6 +67,14 @@ $(".stars").on("mouseenter", (event) => {
 		}
 	});
 });
+
+$("button").on('click', function(event) {
+	event.preventDefault();
+	stars = $(".fa-star.selected").attr('data-id');
+	$(this).parent("form").find('.input_stars').val(stars);
+	$("form").submit();
+});
+
 $(".stars").on("mouseleave", (event) => {
 	let $groupe = $(event.target);
 	$groupe.children(".fa-star").removeClass("hovered");

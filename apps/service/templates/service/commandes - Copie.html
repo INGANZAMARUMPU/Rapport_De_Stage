@@ -1,0 +1,138 @@
+{% extends "table/base.html" %}
+{% load static %}
+{% load mathfilters %}
+{% block body %}
+<div id="accordion">
+	{% for commande in commandes %}
+		<div class="card commands_cards">
+			<a data-toggle="collapse" class="text-decoration-none" 
+				data-target="#collapse{{ commande.id }}">
+				<div class="card-header">
+					commande {{ forloop.counter }}
+					{% if not commande.serveur %}
+					<button data-id={{ commande.id }} 
+						class="float-right btn btn-primary btn-sm">
+						m'en charger
+					</button>
+					{% endif %}
+				</div>
+			</a>
+			<div id="collapse{{ commande.id }}" class="collapse">
+				<div class="card-body">
+					<ul>
+					{% for panier in commande.paniers %}
+						<li>{{ panier.quantite }} {{ panier.recette.nom }}</li>
+					{% endfor %}
+					</ul>
+				</div>
+			</div>
+		</div>
+	{% endfor %}
+</div>
+{# <div id="facture" style="display:none;">
+
+<img src="{% static "img/favicon.png" %}">
+<br>
+<span style="font-weight: bold">
+{{ commande.table.user.username }}<br>
+{{ commande.tel }}<br>
+{{ commande.date }}<br><br>
+</span>
+<table>
+        <thead>
+            <tr>
+                <th>Q</th>
+                <th>produit</th>
+                <th>P.U</th>
+                <th>Tot</th>
+            </tr>
+        </thead>
+        <tbody>
+
+		{% for commande in commandes %}
+	        {% for panier in commande.paniers %}
+	            <tr>
+	                <td style="max-width:20px;">{{ panier.quantite|floatformat:0 }}</td>
+	                <td style="font-weight: bold;max-width:75px;">{{ panier.recette.nom }} </td>
+	                <td style="max-width:30px;">{{ panier.recette.prix|floatformat:0 }}</td>
+	                <td style="max-width:30px;">{{ panier.quantite|mul:panier.recette.prix|floatformat:0 }}</td>
+	            </tr>
+	        {% endfor %}
+	    {% endfor %}
+            <tr>
+                <td></td>
+                <td></td>
+                <td>
+                    <b style="font-weight: bold">Total</b><br>
+                    <b style="font-weight: bold">payée</b><br>
+                    <b style="font-weight: bold">reste</b><br>
+                </td>
+                <td>
+                    <b>{{ commande.somme|floatformat:0 }}</b><br>
+                    <b>{{ commande.payee|default_if_none:"0"|floatformat:0 }}</b><br>
+                    <b>{{ commande.reste|default_if_none:commande.somme|floatformat:0 }}</b><br>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <br>
+    <b style="font-weight: bold">nom du serveur</b>
+    <br>
+    <b>{{ commande.personnel.user.first_name }}</b>
+    <b>{{ commande.personnel.user.last_name }}</b>
+    <br>
+    <hr>
+    <div class="centered" style="text-align:center;">
+        <em style="word-break: initial;" >Turabashimiye cane kuba mwadushoreye</em>
+    </div>
+    <hr>
+  </div>
+</div> #}
+<script type="text/javascript">
+$(document).ready(function(){
+	$("#accordion").on('click', 'a', function(event) {
+		target = $($(this).attr('data-target'));
+		target.toggleClass('show');
+		event.preventDefault();
+		event.stopPropagation();
+	});
+	$("#accordion").on('click', 'button', function(event) {
+		event.preventDefault();
+		event.stopPropagation();
+		btn = $(this);
+		commande = $(this).attr('data-id');
+		console.log(sessionStorage.getItem("urgent_list").split(","));
+		console.log(commande);
+		if(sessionStorage.getItem("urgent")<1 |
+			sessionStorage.getItem("urgent_list")
+			.split(",").includes(commande)){
+			$.ajax({
+				url: `/api/commande/${commande}/se_charger/`,
+				type: 'PUT',
+				dataType: 'json',
+				headers:{"X-CSRFToken":$.cookie("csrftoken")},
+			})
+			.done(function(data) {
+				console.log(data);
+				btn.remove();
+			})
+			.fail(function() {
+				console.log("error");
+			})
+		}	
+	});
+});
+
+
+function printDiv() { 
+	var divContents = document.getElementById("facture").innerHTML; 
+	var a = window.open('', '', 'height=500, width=500'); 
+	a.document.write('<html>'); 
+	a.document.write('<body > <h1>Div contents are <br>'); 
+	a.document.write(divContents); 
+	a.document.write('</body></html>'); 
+	a.document.close(); 
+	a.print(); 
+} 
+</script>
+{% endblock body %}

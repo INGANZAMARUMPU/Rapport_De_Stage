@@ -3,6 +3,10 @@ from django.db.models import Sum
 from django.utils import timezone
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save, pre_save
+
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
+
 from datetime import datetime, timedelta, date
 from random import randint
 
@@ -167,6 +171,7 @@ class Panier(models.Model):
 	somme = models.PositiveIntegerField(blank=True, verbose_name='à payer')
 	pret = models.BooleanField(default=False)
 	date = models.DateTimeField(default=timezone.now)
+	obligations = models.TextField(null=True, blank=True)
 
 	def save(self, *args, **kwargs):
 		self.somme = self.recette.prix*self.quantite
@@ -216,10 +221,17 @@ class Paiement(models.Model):
 class FeedBack(models.Model):
 	recette = models.ForeignKey("Recette", on_delete=models.CASCADE)
 	commande = models.ForeignKey("Commande", null=True, on_delete=models.SET_NULL)
-	stars = models.PositiveIntegerField()
-	commentaire = models.TextField(blank=True)
+	stars = models.PositiveIntegerField(null=True, blank=True)
+	commentaire = models.TextField(null=True, blank=True)
 	visible = models.BooleanField(default=True)
 	date = models.DateField(blank=True, default=timezone.now)
+
+	def __str__():
+		return commentaire
+
+	def save(self, *args, **kwargs):
+		if self.stars or self.commentaire:
+			super(FeedBack, self).save(*args, **kwargs)
 
 	class Meta:
 		unique_together = ('commande', 'recette')
@@ -232,6 +244,7 @@ def delZeroQuantity(sender, instance, *args, **kwargs):
 		self.delete()
 		if not paniers:
 			commande.delete()
+			return
 
 	if self.pret:
 		paniers = Panier.objects.filter(commande=commande, pret=False)
@@ -248,3 +261,23 @@ def delZeroQuantity(sender, instance, *args, **kwargs):
 
 post_save.connect(delZeroQuantity, sender=Panier)
 # pre_save.connect(addIfExist, sender=Panier)
+
+def getCommandState(sender, instance, *args, **kwargs):
+	self = instance
+	if self.servi and self.payee:
+		return
+
+	if self.servi or self.pret or self.commandee:
+		from .serializers import CommandeSerializer
+
+		serializer = CommandeSerializer(instance, many=False)
+		async_to_sync(get_channel_layer().group_send)(
+			'chat_service',
+			{
+				'type': 'chat_message',
+				'message': serializer.data
+			}
+		)
+		return
+
+post_save.connect(getCommandState, sender=Commande)

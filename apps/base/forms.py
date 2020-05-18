@@ -122,4 +122,4 @@ class PaiementForm(forms.ModelForm):
 class FeedBackForm(forms.ModelForm):
 	class Meta:
 		model = FeedBack
-		fields = "__all__"
+		fields = ("recette", "commande", "stars", "commentaire")

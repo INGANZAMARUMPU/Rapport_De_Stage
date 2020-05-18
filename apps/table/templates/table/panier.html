@@ -121,7 +121,8 @@ $("#commander").on('click', function(){
 			let $tr = $(tr);
 			let id = $tr.attr("data-id");
 			let quantite = $tr.find(".quantite").first().val();
-			data = {id:id, quantite:quantite};
+			let obligations = $tr.attr("obligations");
+			data = {id:id, quantite:quantite, obligations:obligations};
 			// datas.push(data);
 			$.ajax({
 				type:'PATCH',
@@ -170,6 +171,18 @@ $("#commander").on('click', function(){
 		}
 	});
 });
+
+$(".cart-item").on('click', function(event) {
+	event.preventDefault();
+	if(event.target.nodeName!="INPUT"){
+		let comment = prompt(
+			"Vous pouvez saisir vos obligations sur cette recette",
+			$(this).attr('obligations')
+		);
+		$(this).attr('obligations', comment);
+	}
+});
+
 
 });
 </script>
