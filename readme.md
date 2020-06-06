@@ -6,6 +6,8 @@ Bibliothèques (actuelles)
 	backend:
 		- django
 		- django-rest-framework
+		- django-mathfilters
+		- channels
 		- pillow
 	fronted:
 		- jquery
@@ -13,10 +15,8 @@ Bibliothèques (actuelles)
 		- chart.js
 
 je compte ajouter plutard:
-	- django-mathfilters
 	- xhtml2pdf
 	- openpyxl
-	- django-crispy-forms
 	- django headcrumbs
 
 je me suis pas encore décidé sur tout
